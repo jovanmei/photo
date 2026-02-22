@@ -32,3 +32,5 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./dist
+        # Ensure the 404.html is copied for client-side routing
+        enable_jekyll: false

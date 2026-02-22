@@ -23,4 +23,16 @@ export default defineConfig({
   // GitHub Pages deployment configuration
   // Set base to your repository name when deploying
   base: '/photo/',
+  
+  // Build configuration
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    // Ensure assets are properly hashed and referenced
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+  },
 })
