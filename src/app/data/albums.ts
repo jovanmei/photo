@@ -17,6 +17,8 @@ export interface Album {
 }
 
 const STORAGE_KEY = 'photoGallery_albums';
+const STORAGE_VERSION_KEY = 'photoGallery_version';
+const CURRENT_VERSION = '2'; // Increment when data structure changes
 
 export const initialAlbums: Album[] = [
   {
@@ -156,6 +158,13 @@ export const saveAlbumsToStorage = (albums: Album[]) => {
 
 export const loadAlbumsFromStorage = (): Album[] => {
   try {
+    // Check version - if mismatched, clear storage and use initial data
+    const storedVersion = localStorage.getItem(STORAGE_VERSION_KEY);
+    if (storedVersion !== CURRENT_VERSION) {
+      localStorage.setItem(STORAGE_VERSION_KEY, CURRENT_VERSION);
+      return initialAlbums;
+    }
+
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) return initialAlbums;
     
@@ -165,7 +174,8 @@ export const loadAlbumsFromStorage = (): Album[] => {
       createdAt: new Date(album.createdAt),
       photos: album.photos.map((photo: any) => ({
         ...photo,
-        uploadDate: new Date(photo.uploadDate)
+        uploadDate: new Date(photo.uploadDate),
+        location: photo.location
       }))
     }));
   } catch (error) {
