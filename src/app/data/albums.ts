@@ -3,6 +3,7 @@ export interface Photo {
   url: string;
   name: string;
   description?: string;
+  location?: string;
   uploadDate: Date;
 }
 
@@ -29,18 +30,21 @@ export const initialAlbums: Album[] = [
         id: "p1",
         url: "https://images.unsplash.com/photo-1628889923625-e3b33f73d780?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
         name: "Panda Bamboo",
+        location: "Chengdu, China",
         uploadDate: new Date("2024-01-15")
       },
       {
         id: "p2",
         url: "https://images.unsplash.com/photo-1509005084666-3cbc75184cbb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
         name: "Dog Portrait",
+        location: "Tokyo, Japan",
         uploadDate: new Date("2024-01-15")
       },
       {
         id: "p3",
         url: "https://images.unsplash.com/photo-1574068774810-a5ccb01f9620?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
         name: "Magical Horse",
+        location: "Iceland",
         uploadDate: new Date("2024-01-15")
       }
     ]
@@ -56,12 +60,14 @@ export const initialAlbums: Album[] = [
         id: "p4",
         url: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
         name: "City Lights",
+        location: "New York, USA",
         uploadDate: new Date("2024-02-20")
       },
       {
         id: "p5",
         url: "https://images.unsplash.com/photo-1514565131-fce0801e5785?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
         name: "Street Photography",
+        location: "London, UK",
         uploadDate: new Date("2024-02-20")
       }
     ]
@@ -77,18 +83,21 @@ export const initialAlbums: Album[] = [
         id: "p6",
         url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
         name: "Mountain View",
+        location: "Swiss Alps, Switzerland",
         uploadDate: new Date("2024-03-10")
       },
       {
         id: "p7",
         url: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
         name: "Waterfall",
+        location: "Plitvice, Croatia",
         uploadDate: new Date("2024-03-10")
       },
       {
         id: "p8",
         url: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
         name: "Lake Reflection",
+        location: "Banff, Canada",
         uploadDate: new Date("2024-03-10")
       }
     ]

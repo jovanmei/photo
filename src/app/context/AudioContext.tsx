@@ -33,7 +33,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         preload="auto"
       >
         <source 
-          src="/Soft Edges Of The Unknown - Peace.mp3" 
+          src="./Soft Edges Of The Unknown - Peace.mp3" 
           type="audio/mpeg" 
         />
         Your browser does not support the audio element.

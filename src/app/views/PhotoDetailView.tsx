@@ -118,6 +118,16 @@ export const PhotoDetailView = () => {
             >
                 {String(currentIndex).padStart(2, '0')}
             </motion.h3>
+            {currentPhoto.location && (
+              <motion.span 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.6 }}
+                transition={{ delay: 0.5 }}
+                className="text-[10px] uppercase tracking-widest mt-2"
+              >
+                {currentPhoto.location}
+              </motion.span>
+            )}
           </div>
 
           <div className="w-full text-right mt-12 flex flex-col items-end gap-6">
@@ -125,7 +135,7 @@ export const PhotoDetailView = () => {
             <div className="flex flex-col items-end gap-4 max-w-xs">
               <span className="text-[10px] opacity-40">[{currentIndex}]</span>
               <p className="text-[13px] leading-relaxed">
-                I'm not great with words. That's why I take photos. Every image here has a story. Someone I met, a place I walked through, a moment I didn't expect but couldn't let pass. This is more than a portfolio. It's what I want to remember, and maybe, what you'll feel something from too.
+                Every photograph is a ray of light that time leaves behind in this world, a way to capture those fleeting yet eternal moments. Where light and shadow meet, we encounter another version of ourselves.
               </p>
             </div>
           </div>
