@@ -14,11 +14,11 @@ export const HomeView = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-[#F2F2F2] text-black font-sans flex flex-col p-8 md:p-12 overflow-hidden">
+    <div className="min-h-screen bg-[#F2F2F2] text-black font-sans flex flex-col p-4 md:p-8 lg:p-12 overflow-hidden">
       {/* Header */}
-      <header className="flex justify-between items-start w-full relative z-20">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center w-full relative z-20 gap-4">
         <Link to="/" className="text-xl font-bold tracking-tighter hover:opacity-50 transition-opacity">JOVAN ®</Link>
-        <nav className="flex items-center gap-10">
+        <nav className="flex items-center gap-4 md:gap-10">
           <Link to="/stories" className="text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all after:content-[''] after:block after:h-px after:w-0 hover:after:w-full after:bg-black after:transition-all">Stories</Link>
           <Link to="/orbit" className="text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all after:content-[''] after:block after:h-px after:w-0 hover:after:w-full after:bg-black after:transition-all">Orbit</Link>
           <Link to="/about" className="text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all after:content-[''] after:block after:h-px after:w-0 hover:after:w-full after:bg-black after:transition-all">About</Link>
@@ -27,7 +27,7 @@ export const HomeView = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 grid grid-cols-12 gap-4 mt-12 relative">
+      <main className="flex-1 grid grid-cols-12 gap-4 mt-8 md:mt-12 relative">
         {/* Left Image Column */}
         <div className="col-span-12 md:col-span-4 lg:col-span-3 z-10">
           <motion.div 
@@ -45,10 +45,10 @@ export const HomeView = () => {
         </div>
 
         {/* Right Text Column */}
-        <div className="col-span-12 md:col-span-5 md:col-start-8 lg:col-span-4 lg:col-start-9 flex flex-col gap-4 z-10">
+        <div className="col-span-12 md:col-span-5 md:col-start-8 lg:col-span-4 lg:col-start-9 flex flex-col gap-4 z-10 mt-4 md:mt-0">
           <div className="flex gap-4 items-start">
-            <span className="text-[10px] opacity-60 mt-1">[1]</span>
-            <p className="text-[13px] leading-relaxed max-w-sm">
+            {/* <span className="text-[10px] opacity-60 mt-1">[1]</span> */}
+            <p className="text-sm md:text-[13px] leading-relaxed max-w-sm">
               I'm not great with words. That's why I take photos. Every image here has a story. Someone I met, a place I walked through, a moment I didn't expect but couldn't let pass. This is more than a portfolio. It's what I want to remember, and maybe, what you'll feel something from too.
             </p>
           </div>
@@ -56,23 +56,23 @@ export const HomeView = () => {
 
         {/* Big Background Heading */}
         <div className="absolute bottom-0 right-0 left-0 pointer-events-none flex flex-col items-end z-0">
-          <div className="flex items-center gap-12 w-full justify-between mb-4">
-             <div className="flex gap-8 text-[10px] opacity-40">
-                <span>[ ↓ ]</span>
-                <span>[2]</span>
+          <div className="flex items-center gap-4 md:gap-12 w-full justify-between mb-2 md:mb-4">
+             <div className="flex gap-4 md:gap-8 text-[10px] opacity-40">
+                {/* <span>[ ↓ ]</span> */}
+                {/* <span>[2]</span> */}
              </div>
-             <div className="h-[60px] w-px bg-black/10"></div>
+             <div className="h-[40px] md:h-[60px] w-px bg-black/10"></div>
           </div>
           <div className="relative w-full text-right">
              <motion.h2 
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, ease: "easeOut" }}
-                className="text-[15vw] font-black leading-[0.8] tracking-tighter lowercase select-none"
+                className="text-[20vw] md:text-[15vw] font-black leading-[0.8] tracking-tighter lowercase select-none"
              >
                 capture
              </motion.h2>
-             <div className="flex justify-between items-end mt-4">
+             <div className="flex justify-between items-end mt-2 md:mt-4">
                 <span className="text-[10px] opacity-40 tracking-widest">////</span>
                 <span className="text-[10px] opacity-40 tracking-widest uppercase">moment</span>
              </div>
@@ -81,7 +81,7 @@ export const HomeView = () => {
       </main>
 
       {/* Scroll to Stories Arrow */}
-      <div className="absolute bottom-8 left-1/6 transform -translate-x-1/2 flex flex-col items-center z-20">
+      <div className="absolute bottom-4 md:bottom-8 left-1/4 md:left-1/6 transform -translate-x-1/2 flex flex-col items-center z-20">
         <motion.button
           onClick={goToStories}
           initial={{ opacity: 0, y: -20 }}
