@@ -7,6 +7,7 @@ import { useAlbums } from "../context/AlbumContext";
 import { CloudinaryUpload } from "../components/CloudinaryUpload";
 import { CloudinaryConfigCheck } from "../components/CloudinaryConfigCheck";
 import { SyncSettings } from "../components/SyncSettings";
+import { DataExport } from "../components/DataExport";
 import { isCloudinaryConfigured, UploadResult } from "../utils/cloudinary";
 import { toast } from "sonner";
 import { Upload, Edit2, GripVertical, Save, X, Download, FileUp } from "lucide-react";
@@ -361,6 +362,11 @@ export const AlbumManagementView = () => {
         {/* Cloud Sync Settings */}
         <div className="mb-8">
           <SyncSettings />
+        </div>
+
+        {/* Data Export */}
+        <div className="mb-8">
+          <DataExport albums={albums} />
         </div>
 
         {/* Create Album Form */}
