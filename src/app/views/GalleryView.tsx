@@ -159,11 +159,11 @@ export const GalleryView = () => {
 
       {/* Main Content Container */}
       <div className="flex-1 flex flex-col items-center justify-center">
-        <div className="flex items-center gap-6 md:gap-8 lg:gap-16">
+        <div className="flex items-center justify-center gap-2 md:gap-8 lg:gap-16 w-full">
           <button 
             onClick={handlePrevPhoto}
             aria-label="Previous photo"
-            className="text-[10px] font-black tracking-[0.3em] uppercase hover:opacity-50 transition-opacity whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-black/20 px-4 py-3 min-h-[44px] min-w-[44px]"
+            className="text-[9px] md:text-[10px] font-black tracking-[0.2em] md:tracking-[0.3em] uppercase hover:opacity-50 transition-opacity whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-black/20 px-2 py-3 md:px-4 min-h-[44px] min-w-[44px] flex-shrink-0"
           >
             [ Prev ]
           </button>
@@ -173,7 +173,7 @@ export const GalleryView = () => {
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="w-[60vw] md:w-[35vw] aspect-square bg-neutral-200 overflow-hidden shadow-2xl relative"
+            className="w-[50vw] md:w-[35vw] aspect-square bg-neutral-200 overflow-hidden shadow-2xl relative flex-shrink-0"
           >
              {currentPhoto.url && (
                <Link 
@@ -194,7 +194,7 @@ export const GalleryView = () => {
           <button 
             onClick={handleNextPhoto}
             aria-label="Next photo"
-            className="text-[10px] font-black tracking-[0.3em] uppercase hover:opacity-50 transition-opacity whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-black/20 px-4 py-3 min-h-[44px] min-w-[44px]"
+            className="text-[9px] md:text-[10px] font-black tracking-[0.2em] md:tracking-[0.3em] uppercase hover:opacity-50 transition-opacity whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-black/20 px-2 py-3 md:px-4 min-h-[44px] min-w-[44px] flex-shrink-0"
           >
             [ Next ]
           </button>
