@@ -9,6 +9,7 @@ import { CloudinaryConfigCheck } from "../components/CloudinaryConfigCheck";
 import { SyncSettings } from "../components/SyncSettings";
 import { DataExport } from "../components/DataExport";
 import { CollapsibleSection } from "../components/CollapsibleSection";
+import { Navbar } from "../components/Navbar";
 import { isCloudinaryConfigured, UploadResult } from "../utils/cloudinary";
 import { toast } from "sonner";
 import { Upload, Edit2, GripVertical, Save, X, Download, FileUp, Move, FolderOpen, Cloud, FileCode } from "lucide-react";
@@ -380,15 +381,7 @@ export const AlbumManagementView = () => {
   return (
     <div className="min-h-screen bg-[#F2F2F2] text-black font-sans flex flex-col p-4 md:p-8 lg:p-12">
       {/* Header */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center w-full mb-8 md:mb-12 gap-4">
-        <Link to="/" className="text-xl font-bold tracking-tighter hover:opacity-50 transition-opacity">JOVAN ®</Link>
-        <nav className="flex gap-4 md:gap-10">
-          <Link to="/stories" className="text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all">Stories</Link>
-          <Link to="/orbit" className="text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all">Orbit</Link>
-          <Link to="/about" className="text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all">About</Link>
-          <Link to="/admin" className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-50">Albums</Link>
-        </nav>
-      </header>
+      <Navbar showAlbumsLink />
 
       <div className="flex-1 max-w-7xl w-full mx-auto">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">

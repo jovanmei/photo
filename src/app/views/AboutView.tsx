@@ -2,6 +2,7 @@ import * as React from "react";
 import { motion } from "motion/react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { Navbar } from "../components/Navbar";
 import { saveScrollPosition, restoreScrollPosition } from "../utils/scrollPosition";
 
 const ADMIN_PASSWORD = "1";
@@ -87,16 +88,9 @@ export const AboutView = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#F2F2F2] text-black font-sans flex flex-col p-8 md:p-12 relative">
+    <div className="min-h-screen bg-[#F2F2F2] text-black font-sans flex flex-col p-4 md:p-8 lg:p-12 relative">
       {/* Top Navigation */}
-      <header className="flex justify-between items-start w-full relative z-20 mb-16">
-        <Link to="/" className="text-xl font-bold tracking-tighter hover:opacity-50 transition-opacity">JOVAN ®</Link>
-        <nav className="flex gap-10">
-          <Link to="/stories" className={`text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all after:content-[''] after:block after:h-px after:w-0 hover:after:w-full after:bg-black after:transition-all ${location.pathname === '/stories' ? 'opacity-50' : ''}`}>Stories</Link>
-          <Link to="/orbit" className={`text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all after:content-[''] after:block after:h-px after:w-0 hover:after:w-full after:bg-black after:transition-all ${location.pathname === '/orbit' ? 'opacity-50' : ''}`}>Orbit</Link>
-          <Link to="/about" className={`text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all after:content-[''] after:block after:h-px after:w-0 hover:after:w-full after:bg-black after:transition-all ${location.pathname === '/about' ? 'opacity-50' : ''}`}>About</Link>
-        </nav>
-      </header>
+      <Navbar />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col justify-center">

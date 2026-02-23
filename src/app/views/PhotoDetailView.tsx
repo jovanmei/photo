@@ -2,6 +2,7 @@ import * as React from "react";
 import { motion } from "motion/react";
 import { Link, useNavigate, useParams, useLocation } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { Navbar } from "../components/Navbar";
 import { useAlbums } from "../context/AlbumContext";
 import { 
   getPhotoByIdFromAlbums, 
@@ -66,26 +67,7 @@ export const PhotoDetailView = () => {
       transition={{ duration: 0.25, ease: "easeInOut" }}
     >
       {/* Top Header with Close Button */}
-      <header className="flex justify-between items-start w-full relative z-20">
-        <Link to="/" className="text-xl font-bold tracking-tighter hover:opacity-50 transition-opacity">JOVAN ®</Link>
-        <div className="flex items-center gap-8">
-          <button 
-            onClick={goHome}
-            className="text-[10px] font-black tracking-[0.3em] uppercase hover:opacity-50 transition-opacity"
-            aria-label="Return to home page"
-          >
-            WILDLIFE
-          </button>
-          <button 
-            onClick={handleClose}
-            className="text-[10px] font-black tracking-[0.3em] uppercase hover:opacity-50 transition-opacity focus:outline-none focus:ring-2 focus:ring-black/20 px-2 py-1"
-            aria-label="Close photo detail"
-            role="button"
-          >
-            [ CLOSE ]
-          </button>
-        </div>
-      </header>
+      <Navbar showCloseButton onClose={goHome} />
 
       {/* Top Layout Grid */}
       <div className="grid grid-cols-12 gap-8 items-start relative">

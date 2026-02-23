@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { Link, useNavigate } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { SoundWaveIcon } from "../components/SoundWaveIcon";
+import { Navbar } from "../components/Navbar";
 import { useAudio } from "../context/AudioContext";
 
 export const HomeView = () => {
@@ -16,15 +17,7 @@ export const HomeView = () => {
   return (
     <div className="min-h-screen bg-[#F2F2F2] text-black font-sans flex flex-col p-4 md:p-8 lg:p-12 overflow-hidden">
       {/* Header */}
-      <header className="flex flex-row justify-between items-center w-full relative z-20 gap-2 md:gap-4">
-        <Link to="/" className="text-lg md:text-xl font-bold tracking-tighter hover:opacity-50 transition-opacity">JOVAN ®</Link>
-        <nav className="flex items-center gap-2 md:gap-10 flex-shrink-0">
-          <Link to="/stories" className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] hover:opacity-50 transition-all">Stories</Link>
-          <Link to="/orbit" className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] hover:opacity-50 transition-all">Orbit</Link>
-          <Link to="/about" className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] hover:opacity-50 transition-all">About</Link>
-          <SoundWaveIcon isPlaying={isPlaying} onClick={togglePlay} />
-        </nav>
-      </header>
+      <Navbar rightElement={<SoundWaveIcon isPlaying={isPlaying} onClick={togglePlay} />} />
 
       {/* Main Content */}
       <main className="flex-1 grid grid-cols-12 gap-4 mt-6 md:mt-12 relative pb-[35vh] md:pb-0">
