@@ -51,9 +51,9 @@ export const GalleryView = () => {
     return 0;
   });
   
-  const currentAlbum = albums[currentAlbumIndex] || albums[0];
-  const currentPhotos = currentAlbum.photos.length > 0 ? currentAlbum.photos : [{ id: "empty", url: "", name: "No photos", uploadDate: new Date() }];
-  const currentPhoto = currentPhotos[currentPhotoIndex];
+  const currentAlbum = albums[currentAlbumIndex] || albums[0] || { id: "fallback", title: "Fallback", displayTitle: "fallback", description: "", createdAt: new Date(), photos: [] };
+  const currentPhotos = currentAlbum.photos.length > 0 ? currentAlbum.photos : [{ id: "empty", url: "https://images.unsplash.com/photo-1628889923625-e3b33f73d780?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080", name: "No photos yet", uploadDate: new Date() }];
+  const currentPhoto = currentPhotos[currentPhotoIndex] || currentPhotos[0];
 
   const handlePrevPhoto = React.useCallback(() => {
     const newIndex = (currentPhotoIndex - 1 + currentPhotos.length) % currentPhotos.length;
@@ -67,6 +67,12 @@ export const GalleryView = () => {
 
   const handleNextAlbum = React.useCallback(() => {
     const newIndex = (currentAlbumIndex + 1) % albums.length;
+    setCurrentAlbumIndex(newIndex);
+    setCurrentPhotoIndex(0);
+  }, [currentAlbumIndex, albums.length]);
+
+  const handlePrevAlbum = React.useCallback(() => {
+    const newIndex = (currentAlbumIndex - 1 + albums.length) % albums.length;
     setCurrentAlbumIndex(newIndex);
     setCurrentPhotoIndex(0);
   }, [currentAlbumIndex, albums.length]);
@@ -139,12 +145,12 @@ export const GalleryView = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.05 }}
               onClick={() => setCurrentPhotoIndex(i)}
-              className={`flex-shrink-0 w-[13%] aspect-square bg-neutral-200 grayscale overflow-hidden cursor-pointer transition-all ${i === currentPhotoIndex ? 'ring-2 ring-black ring-offset-2' : ''}`}
+              className={`flex-shrink-0 w-[13%] aspect-square bg-neutral-200 overflow-hidden cursor-pointer transition-all ${i === currentPhotoIndex ? 'ring-2 ring-black ring-offset-2' : ''}`}
             >
               <ImageWithFallback 
                 src={photo.url} 
                 alt={photo.name}
-                className="w-full h-full object-cover grayscale brightness-90 hover:brightness-100 transition-all"
+                className="w-full h-full object-cover transition-all"
               />
             </motion.div>
           ))}
@@ -167,7 +173,7 @@ export const GalleryView = () => {
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="w-[70vw] md:w-[35vw] aspect-square bg-neutral-200 grayscale overflow-hidden shadow-2xl relative"
+            className="w-[70vw] md:w-[35vw] aspect-square bg-neutral-200 overflow-hidden shadow-2xl relative"
           >
              {currentPhoto.url && (
                <Link 
@@ -179,7 +185,7 @@ export const GalleryView = () => {
                   <ImageWithFallback 
                     src={currentPhoto.url} 
                     alt={currentPhoto.name}
-                    className="w-full h-full object-cover filter grayscale"
+                    className="w-full h-full object-cover"
                   />
                </Link>
              )}
@@ -217,7 +223,13 @@ export const GalleryView = () => {
 
       {/* Footer Markers */}
       <div className="absolute bottom-12 left-12 right-12 flex justify-between items-end">
-        <span className="text-[10px] font-black tracking-[0.4em] uppercase opacity-80">TOP</span>
+        <button 
+          onClick={handlePrevAlbum}
+          className="text-[10px] font-black tracking-[0.4em] uppercase opacity-80 hover:opacity-100 hover:scale-105 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-black/20 px-2 py-1"
+          aria-label="Previous album"
+        >
+          TOP
+        </button>
         <button 
           onClick={handleNextAlbum}
           className="text-[10px] font-black tracking-[0.4em] uppercase opacity-80 hover:opacity-100 hover:scale-105 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-black/20 px-2 py-1"

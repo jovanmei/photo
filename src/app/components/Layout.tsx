@@ -10,8 +10,7 @@ export const Header = ({ isAdmin = false }: { isAdmin?: boolean }) => {
 
   const navItems = isAdmin 
     ? [
-        { label: "DASHBOARD", path: "/admin" },
-        { label: "MY ALBUMS", path: "/admin/albums" },
+        { label: "MY ALBUMS", path: "/admin" },
         { label: "VIEW SITE", path: "/" },
       ]
     : [
@@ -42,14 +41,6 @@ export const Header = ({ isAdmin = false }: { isAdmin?: boolean }) => {
       </div>
 
       <div className="flex items-center gap-6">
-        {isAdmin && (
-          <Link to="/admin/upload">
-            <Button className="hidden md:flex gap-2">
-              <Plus size={14} />
-              UPLOAD
-            </Button>
-          </Link>
-        )}
         <button 
           className="md:hidden"
           onClick={() => setIsOpen(!isOpen)}
@@ -76,14 +67,6 @@ export const Header = ({ isAdmin = false }: { isAdmin?: boolean }) => {
                 {item.label}
               </Link>
             ))}
-            {isAdmin && (
-              <Link to="/admin/upload" onClick={() => setIsOpen(false)}>
-                <Button className="w-full flex justify-center gap-2">
-                  <Plus size={14} />
-                  UPLOAD
-                </Button>
-              </Link>
-            )}
           </motion.div>
         )}
       </AnimatePresence>

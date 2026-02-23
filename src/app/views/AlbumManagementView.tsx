@@ -4,6 +4,11 @@ import { Link } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { Album, Photo, generateId } from "../data/albums";
 import { useAlbums } from "../context/AlbumContext";
+import { CloudinaryUpload } from "../components/CloudinaryUpload";
+import { CloudinaryConfigCheck } from "../components/CloudinaryConfigCheck";
+import { isCloudinaryConfigured, UploadResult } from "../utils/cloudinary";
+import { toast } from "sonner";
+import { Upload } from "lucide-react";
 
 export const AlbumManagementView = () => {
   const { albums, addAlbum, deleteAlbum, addPhotosToAlbum, updatePhoto, deletePhoto } = useAlbums();
@@ -12,10 +17,12 @@ export const AlbumManagementView = () => {
   const [newAlbumDescription, setNewAlbumDescription] = React.useState("");
   const [errors, setErrors] = React.useState<{ title?: string; description?: string; files?: string }>({});
   const [selectedAlbum, setSelectedAlbum] = React.useState<string | null>(null);
-  const [uploading, setUploading] = React.useState(false);
+  const [showUploadModal, setShowUploadModal] = React.useState(false);
+  const [uploadingAlbumId, setUploadingAlbumId] = React.useState<string | null>(null);
   const [editingPhoto, setEditingPhoto] = React.useState<{ albumId: string; photo: Photo } | null>(null);
   const [editPhotoName, setEditPhotoName] = React.useState("");
   const [editPhotoDescription, setEditPhotoDescription] = React.useState("");
+  const [editPhotoLocation, setEditPhotoLocation] = React.useState("");
   const [showSaveConfirm, setShowSaveConfirm] = React.useState(false);
   const [previewPhoto, setPreviewPhoto] = React.useState<Photo | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -57,57 +64,34 @@ export const AlbumManagementView = () => {
   const handleDeleteAlbum = React.useCallback((albumId: string) => {
     if (confirm("Are you sure you want to delete this album? This action cannot be undone.")) {
       deleteAlbum(albumId);
-      if (selectedAlbum === albumId) {
-        setSelectedAlbum(null);
-      }
     }
-  }, [deleteAlbum, selectedAlbum]);
+  }, [deleteAlbum]);
 
-  const handleFileSelect = React.useCallback((albumId: string) => {
-    setSelectedAlbum(albumId);
-    fileInputRef.current?.click();
+  const openUploadModal = React.useCallback((albumId: string) => {
+    setUploadingAlbumId(albumId);
+    setShowUploadModal(true);
   }, []);
 
-  const handleFileUpload = React.useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0 || !selectedAlbum) return;
+  const handleUploadComplete = React.useCallback((results: UploadResult[]) => {
+    if (!uploadingAlbumId) return;
 
-    setUploading(true);
-    setErrors({});
+    const newPhotos: Photo[] = results.map((result) => ({
+      id: generateId(),
+      url: result.secure_url,
+      name: result.original_filename,
+      uploadDate: new Date(result.created_at),
+    }));
 
-    try {
-      const formData = new FormData();
-      for (let i = 0; i < files.length; i++) {
-        formData.append('photos', files[i]);
-      }
+    addPhotosToAlbum(uploadingAlbumId, newPhotos);
+    toast.success(`Successfully uploaded ${results.length} photo(s)`);
+    setShowUploadModal(false);
+    setUploadingAlbumId(null);
+  }, [uploadingAlbumId, addPhotosToAlbum]);
 
-      const response = await fetch('http://localhost:3001/api/upload', {
-        method: 'POST',
-        body: formData
-      });
-
-      const result = await response.json();
-      
-      if (result.success) {
-        const newPhotos: Photo[] = result.files.map(file => ({
-          id: file.id,
-          url: file.url,
-          name: file.name,
-          uploadDate: new Date(file.uploadDate)
-        }));
-        addPhotosToAlbum(selectedAlbum, newPhotos);
-      } else {
-        setErrors({ files: result.error });
-      }
-    } catch (error) {
-      setErrors({ files: "上传失败，请检查后端服务器是否运行" });
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  }, [selectedAlbum, addPhotosToAlbum]);
+  const handleUploadError = React.useCallback((error: any) => {
+    console.error("Upload error:", error);
+    toast.error(error.message || "Upload failed");
+  }, []);
 
   const handleDeletePhoto = React.useCallback((albumId: string, photoId: string) => {
     if (confirm("Are you sure you want to delete this photo?")) {
@@ -119,6 +103,7 @@ export const AlbumManagementView = () => {
     setEditingPhoto({ albumId, photo });
     setEditPhotoName(photo.name);
     setEditPhotoDescription(photo.description || '');
+    setEditPhotoLocation(photo.location || '');
   }, []);
 
   const saveEditPhoto = React.useCallback(() => {
@@ -131,12 +116,13 @@ export const AlbumManagementView = () => {
     
     updatePhoto(editingPhoto.albumId, editingPhoto.photo.id, { 
       name: editPhotoName.trim(),
-      description: editPhotoDescription.trim()
+      description: editPhotoDescription.trim(),
+      location: editPhotoLocation.trim() || undefined,
     });
     
     setEditingPhoto(null);
     setShowSaveConfirm(false);
-  }, [editingPhoto, editPhotoName, editPhotoDescription, updatePhoto]);
+  }, [editingPhoto, editPhotoName, editPhotoDescription, editPhotoLocation, updatePhoto]);
 
   const cancelEdit = React.useCallback(() => {
     setEditingPhoto(null);
@@ -149,6 +135,10 @@ export const AlbumManagementView = () => {
 
   const closePreview = React.useCallback(() => {
     setPreviewPhoto(null);
+  }, []);
+
+  const navigateToPhoto = React.useCallback((photo: Photo) => {
+    window.location.hash = `#/photo/${photo.id}`;
   }, []);
 
   return (
@@ -178,19 +168,12 @@ export const AlbumManagementView = () => {
           </button>
         </div>
 
-        {/* Error Message */}
-        <AnimatePresence>
-          {errors.files && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-6 text-[13px]"
-            >
-              {errors.files}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Cloudinary Configuration Check */}
+        {!isCloudinaryConfigured() && (
+          <div className="mb-8">
+            <CloudinaryConfigCheck />
+          </div>
+        )}
 
         {/* Create Album Form */}
         <AnimatePresence>
@@ -277,11 +260,12 @@ export const AlbumManagementView = () => {
                   </div>
                   <div className="flex flex-col gap-3 ml-8">
                     <button
-                      onClick={() => handleFileSelect(album.id)}
-                      disabled={uploading}
-                      className="text-[10px] font-black tracking-[0.2em] uppercase border-2 border-black px-4 py-2 hover:bg-black hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => openUploadModal(album.id)}
+                      disabled={!isCloudinaryConfigured()}
+                      className="text-[10px] font-black tracking-[0.2em] uppercase border-2 border-black px-4 py-2 hover:bg-black hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
-                      {uploading ? "[ UPLOADING... ]" : "[ UPLOAD ]"}
+                      <Upload size={14} />
+                      [ UPLOAD ]
                     </button>
                     <button
                       onClick={() => handleDeleteAlbum(album.id)}
@@ -303,7 +287,7 @@ export const AlbumManagementView = () => {
                           src={photo.url}
                           alt={photo.name}
                           className="w-full h-full object-cover cursor-pointer"
-                          onClick={() => openPreview(photo)}
+                          onClick={() => navigateToPhoto(photo)}
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
                           <div className="flex gap-2">
@@ -337,6 +321,39 @@ export const AlbumManagementView = () => {
         </div>
       </div>
 
+      {/* Upload Modal */}
+      <AnimatePresence>
+        {showUploadModal && uploadingAlbumId && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="bg-[#F2F2F2] border-2 border-black w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            >
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-black tracking-tighter">Upload Photos</h2>
+                  <button
+                    onClick={() => setShowUploadModal(false)}
+                    className="text-2xl font-black hover:opacity-50 transition-opacity"
+                  >
+                    ×
+                  </button>
+                </div>
+                
+                <CloudinaryUpload
+                  albumId={uploadingAlbumId}
+                  onUploadComplete={handleUploadComplete}
+                  onUploadError={handleUploadError}
+                  maxFiles={10}
+                />
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Edit Photo Modal */}
       <AnimatePresence>
         {editingPhoto && (
@@ -345,52 +362,75 @@ export const AlbumManagementView = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-[#F2F2F2] border-2 border-black p-8 max-w-md w-full"
+              className="bg-[#F2F2F2] border-2 border-black w-full max-w-lg max-h-[90vh] overflow-y-auto"
             >
-              <h2 className="text-xl font-black tracking-tighter mb-6">Edit Photo</h2>
-              
-              <div className="mb-6">
-                <ImageWithFallback
-                  src={editingPhoto.photo.url}
-                  alt={editingPhoto.photo.name}
-                  className="w-full aspect-square object-cover mb-4"
-                />
-              </div>
-              
-              <div className="mb-6">
-                <label className="block text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Photo Name</label>
-                <input
-                  type="text"
-                  value={editPhotoName}
-                  onChange={(e) => setEditPhotoName(e.target.value)}
-                  className="w-full border-2 border-black px-4 py-3 text-[13px] focus:outline-none focus:border-black"
-                />
-              </div>
-              
-              <div className="mb-6">
-                <label className="block text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Photo Description</label>
-                <textarea
-                  value={editPhotoDescription}
-                  onChange={(e) => setEditPhotoDescription(e.target.value)}
-                  rows={4}
-                  className="w-full border-2 border-black px-4 py-3 text-[13px] focus:outline-none focus:border-black resize-none"
-                  placeholder="Add a description for this photo..."
-                />
-              </div>
-              
-              <div className="flex gap-4">
-                <button
-                  onClick={saveEditPhoto}
-                  className="text-[10px] font-black tracking-[0.3em] uppercase bg-black text-white px-6 py-3 hover:opacity-80 transition-opacity flex-1"
-                >
-                  [ SAVE ]
-                </button>
-                <button
-                  onClick={cancelEdit}
-                  className="text-[10px] font-black tracking-[0.3em] uppercase border-2 border-black px-6 py-3 hover:bg-black hover:text-white transition-all flex-1"
-                >
-                  [ CANCEL ]
-                </button>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-black tracking-tighter">Edit Photo</h2>
+                  <button
+                    onClick={cancelEdit}
+                    className="text-2xl font-black hover:opacity-50 transition-opacity"
+                  >
+                    ×
+                  </button>
+                </div>
+                
+                <div className="mb-6">
+                  <ImageWithFallback
+                    src={editingPhoto.photo.url}
+                    alt={editingPhoto.photo.name}
+                    className="w-full aspect-square object-cover"
+                  />
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Photo Name</label>
+                    <input
+                      type="text"
+                      value={editPhotoName}
+                      onChange={(e) => setEditPhotoName(e.target.value)}
+                      className="w-full border-2 border-black px-4 py-3 text-[13px] focus:outline-none focus:border-black"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Location (Optional)</label>
+                    <input
+                      type="text"
+                      value={editPhotoLocation}
+                      onChange={(e) => setEditPhotoLocation(e.target.value)}
+                      className="w-full border-2 border-black px-4 py-3 text-[13px] focus:outline-none focus:border-black"
+                      placeholder="e.g., Tokyo, Japan"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Photo Description</label>
+                    <textarea
+                      value={editPhotoDescription}
+                      onChange={(e) => setEditPhotoDescription(e.target.value)}
+                      rows={4}
+                      className="w-full border-2 border-black px-4 py-3 text-[13px] focus:outline-none focus:border-black resize-y min-h-[100px]"
+                      placeholder="Add a description for this photo..."
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex gap-4 mt-6">
+                  <button
+                    onClick={saveEditPhoto}
+                    className="text-[10px] font-black tracking-[0.3em] uppercase bg-black text-white px-6 py-3 hover:opacity-80 transition-opacity flex-1"
+                  >
+                    [ SAVE ]
+                  </button>
+                  <button
+                    onClick={cancelEdit}
+                    className="text-[10px] font-black tracking-[0.3em] uppercase border-2 border-black px-6 py-3 hover:bg-black hover:text-white transition-all flex-1"
+                  >
+                    [ CANCEL ]
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -459,15 +499,8 @@ export const AlbumManagementView = () => {
           </div>
         )}
       </AnimatePresence>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/gif,image/webp"
-        multiple
-        className="hidden"
-        onChange={handleFileUpload}
-      />
     </div>
   );
 };
+
+export default AlbumManagementView;

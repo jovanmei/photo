@@ -1,0 +1,31 @@
+/* Mobile Responsive Optimizations */
+
+@media (max-width: 767px) {
+  /* Ensure touch targets are at least 44x44px */
+  button,
+  a,
+  input,
+  textarea,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Adjust padding for mobile */
+  .p-8 {
+    padding: 1.5rem;
+  }
+  
+  .p-12 {
+    padding: 1.5rem;
+  }
+  
+  /* Ensure text is readable on small screens */
+  .text-\\[10px\\] {
+    font-size: 0.75rem !important;
+  }
+  
+  .text-\\[13px\\] {
+    font-size: 0.875rem !important;
+  }
+}

@@ -34,7 +34,7 @@ export const HomeView = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-            className="aspect-square bg-neutral-200 grayscale overflow-hidden"
+            className="aspect-square bg-neutral-200 overflow-hidden"
           >
             <ImageWithFallback 
               src="https://images.unsplash.com/photo-1760484701050-88c541f587e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwYmxhY2slMjBhbmQlMjB3aGl0ZSUyMGhvcnNlJTIwZm9nZ3l8ZW58MXx8fHwxNzcxNjg0MTY4fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral" 

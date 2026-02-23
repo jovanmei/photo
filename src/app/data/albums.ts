@@ -108,16 +108,24 @@ export const initialAlbums: Album[] = [
 
 export const generateId = () => Math.random().toString(36).substr(2, 9);
 
-export const getAllPhotos = (albums: Album[]): Photo[] => {
-  return albums.flatMap(album => album.photos);
+const fallbackPhoto: Photo = {
+  id: "fallback",
+  url: "https://images.unsplash.com/photo-1628889923625-e3b33f73d780?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+  name: "Fallback Photo",
+  uploadDate: new Date()
 };
 
-export const getPhotoByIdFromAlbums = (albums: Album[], photoId: string): Photo | null => {
+export const getAllPhotos = (albums: Album[]): Photo[] => {
+  const photos = albums.flatMap(album => album.photos);
+  return photos.length > 0 ? photos : [fallbackPhoto];
+};
+
+export const getPhotoByIdFromAlbums = (albums: Album[], photoId: string): Photo => {
   for (const album of albums) {
     const photo = album.photos.find(p => p.id === photoId);
     if (photo) return photo;
   }
-  return null;
+  return getAllPhotos(albums)[0];
 };
 
 export const getPhotoIndexInAlbums = (albums: Album[], photoId: string): number => {

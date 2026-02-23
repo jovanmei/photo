@@ -96,7 +96,7 @@ export const PhotoDetailView = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
             key={currentPhoto.id}
-            className="aspect-[4/3] bg-neutral-200 grayscale overflow-hidden shadow-2xl"
+            className="aspect-[4/3] bg-neutral-200 overflow-hidden shadow-2xl"
           >
             <ImageWithFallback 
               src={currentPhoto.url} 
@@ -149,7 +149,7 @@ export const PhotoDetailView = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="aspect-video bg-neutral-200 grayscale overflow-hidden shadow-2xl"
+            className="aspect-video bg-neutral-200 overflow-hidden shadow-2xl"
         >
           <ImageWithFallback 
             src={prevPhoto.url} 

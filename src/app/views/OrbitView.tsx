@@ -74,7 +74,7 @@ export const OrbitView = () => {
               className="group cursor-pointer flex flex-col md:flex-row items-center gap-10 max-w-4xl w-full"
               onClick={() => navigate('/stories', { state: { selectedAlbumIndex: index } })}
             >
-              <div className="w-[50vw] md:w-[25vw] aspect-square bg-neutral-200 grayscale overflow-hidden shadow-2xl flex-shrink-0 relative">
+              <div className="w-[50vw] md:w-[25vw] aspect-square bg-neutral-200 overflow-hidden shadow-2xl flex-shrink-0 relative">
                 {coverPhoto && (
                   <ImageWithFallback
                     src={coverPhoto.url}
