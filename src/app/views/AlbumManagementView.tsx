@@ -2,13 +2,14 @@ import * as React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Link } from "react-router";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { Album, Photo, generateId } from "../data/albums";
+import { Album, Photo, generateId, saveAlbumsToStorage } from "../data/albums";
 import { useAlbums } from "../context/AlbumContext";
 import { CloudinaryUpload } from "../components/CloudinaryUpload";
 import { CloudinaryConfigCheck } from "../components/CloudinaryConfigCheck";
+import { SyncSettings } from "../components/SyncSettings";
 import { isCloudinaryConfigured, UploadResult } from "../utils/cloudinary";
 import { toast } from "sonner";
-import { Upload, Edit2, GripVertical, Save, X } from "lucide-react";
+import { Upload, Edit2, GripVertical, Save, X, Download, FileUp } from "lucide-react";
 
 interface DragState {
   draggedPhotoId: string | null;
@@ -236,6 +237,68 @@ export const AlbumManagementView = () => {
     setDragState({ draggedPhotoId: null, draggedOverPhotoId: null });
   }, []);
 
+  const exportData = React.useCallback(() => {
+    try {
+      const dataStr = JSON.stringify(albums, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `photo-gallery-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success("Data exported successfully!");
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error("Failed to export data");
+    }
+  }, [albums]);
+
+  const importData = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const importedAlbums = JSON.parse(content) as Album[];
+        
+        if (!Array.isArray(importedAlbums)) {
+          throw new Error('Invalid data format');
+        }
+
+        for (const album of importedAlbums) {
+          if (!album.id || !album.title || !album.photos) {
+            throw new Error('Invalid album structure');
+          }
+        }
+
+        const processedAlbums = importedAlbums.map(album => ({
+          ...album,
+          createdAt: new Date(album.createdAt),
+          photos: album.photos.map(photo => ({
+            ...photo,
+            uploadDate: new Date(photo.uploadDate)
+          }))
+        }));
+
+        saveAlbumsToStorage(processedAlbums);
+        window.location.reload();
+        toast.success(`Imported ${processedAlbums.length} album(s) successfully!`);
+      } catch (error) {
+        console.error('Import error:', error);
+        toast.error("Failed to import data. Please check the file format.");
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }, []);
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
   return (
     <div className="min-h-screen bg-[#F2F2F2] text-black font-sans flex flex-col p-4 md:p-8 lg:p-12">
       {/* Header */}
@@ -255,12 +318,37 @@ export const AlbumManagementView = () => {
             <h1 className="text-2xl md:text-3xl font-black tracking-tighter mb-2">Album Management</h1>
             <p className="text-[13px] opacity-60">Create and manage your photo albums</p>
           </div>
-          <button
-            onClick={() => setShowCreateForm(!showCreateForm)}
-            className="text-[10px] font-black tracking-[0.3em] uppercase border-2 border-black px-6 py-3 hover:bg-black hover:text-white transition-all min-h-[44px]"
-          >
-            {showCreateForm ? "[ CLOSE ]" : "[ NEW ALBUM ]"}
-          </button>
+          <div className="flex flex-wrap gap-2 md:gap-4">
+            <button
+              onClick={exportData}
+              className="text-[10px] font-black tracking-[0.3em] uppercase border-2 border-black px-4 md:px-6 py-3 hover:bg-black hover:text-white transition-all flex items-center gap-2 min-h-[44px]"
+            >
+              <Download size={14} />
+              <span className="hidden sm:inline">[ EXPORT ]</span>
+              <span className="sm:hidden">EXPORT</span>
+            </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="text-[10px] font-black tracking-[0.3em] uppercase border-2 border-black px-4 md:px-6 py-3 hover:bg-black hover:text-white transition-all flex items-center gap-2 min-h-[44px]"
+            >
+              <FileUp size={14} />
+              <span className="hidden sm:inline">[ IMPORT ]</span>
+              <span className="sm:hidden">IMPORT</span>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={importData}
+              className="hidden"
+            />
+            <button
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              className="text-[10px] font-black tracking-[0.3em] uppercase border-2 border-black px-4 md:px-6 py-3 hover:bg-black hover:text-white transition-all min-h-[44px]"
+            >
+              {showCreateForm ? "[ CLOSE ]" : "[ NEW ALBUM ]"}
+            </button>
+          </div>
         </div>
 
         {/* Cloudinary Configuration Check */}
@@ -269,6 +357,11 @@ export const AlbumManagementView = () => {
             <CloudinaryConfigCheck />
           </div>
         )}
+
+        {/* Cloud Sync Settings */}
+        <div className="mb-8">
+          <SyncSettings />
+        </div>
 
         {/* Create Album Form */}
         <AnimatePresence>
