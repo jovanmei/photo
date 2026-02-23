@@ -3,11 +3,13 @@ import { toast } from "sonner";
 import { GistSyncService } from "../utils/gistSync";
 import { useAlbums } from "../context/AlbumContext";
 import { saveAlbumsToStorage } from "../data/albums";
-import { Cloud, Download, Upload, Unlink, ExternalLink, Key, Check, AlertCircle } from "lucide-react";
+import { Cloud, Download, Upload, Unlink, ExternalLink, Key, Check, AlertCircle, Link2 } from "lucide-react";
 
 export const SyncSettings = () => {
   const { albums } = useAlbums();
   const [token, setToken] = React.useState("");
+  const [gistIdInput, setGistIdInput] = React.useState("");
+  const [showGistIdInput, setShowGistIdInput] = React.useState(false);
   const [isConnected, setIsConnected] = React.useState(GistSyncService.isAuthenticated());
   const [isSyncing, setIsSyncing] = React.useState(false);
   const [isValidating, setIsValidating] = React.useState(false);
@@ -109,13 +111,67 @@ export const SyncSettings = () => {
       const now = new Date().toISOString();
       setLastSyncTime(now);
       
+      const status = GistSyncService.getSyncStatus();
+      setGistUrl(status.gistUrl);
+      
       toast.success(`Downloaded ${processedData.length} album(s) from cloud! Refreshing...`, {
         duration: 2000
       });
       
       setTimeout(() => window.location.reload(), 1500);
     } catch (error: any) {
-      toast.error(error.message || "Failed to download data");
+      if (error.message === 'NO_GIST_FOUND') {
+        toast.error("No synced data found. Please upload data first, or enter a Gist ID manually.", {
+          duration: 5000
+        });
+        setShowGistIdInput(true);
+      } else {
+        toast.error(error.message || "Failed to download data");
+      }
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleDownloadWithGistId = async () => {
+    if (!gistIdInput.trim()) {
+      toast.error("Please enter a Gist ID");
+      return;
+    }
+
+    setIsSyncing(true);
+    try {
+      const data = await GistSyncService.downloadGistWithId(gistIdInput.trim());
+      
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid data format received from cloud");
+      }
+
+      const processedData = data.map((album: any) => ({
+        ...album,
+        createdAt: new Date(album.createdAt),
+        photos: album.photos.map((photo: any) => ({
+          ...photo,
+          uploadDate: new Date(photo.uploadDate)
+        }))
+      }));
+
+      saveAlbumsToStorage(processedData);
+      const now = new Date().toISOString();
+      setLastSyncTime(now);
+      
+      const status = GistSyncService.getSyncStatus();
+      setGistUrl(status.gistUrl);
+      setShowGistIdInput(false);
+      setGistIdInput("");
+      
+      toast.success(`Downloaded ${processedData.length} album(s) from cloud! Refreshing...`, {
+        duration: 2000
+      });
+      
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to download data with the provided Gist ID");
     } finally {
       setIsSyncing(false);
     }
@@ -244,6 +300,15 @@ export const SyncSettings = () => {
               </button>
               
               <button
+                onClick={() => setShowGistIdInput(!showGistIdInput)}
+                disabled={isSyncing}
+                className="text-[10px] font-black tracking-[0.3em] uppercase border-2 border-black px-4 md:px-6 py-3 hover:bg-black hover:text-white transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              >
+                <Link2 size={14} />
+                ENTER GIST ID
+              </button>
+              
+              <button
                 onClick={handleDisconnect}
                 disabled={isSyncing}
                 className="text-[10px] font-black tracking-[0.3em] uppercase text-red-500 border-2 border-red-500 px-4 md:px-6 py-3 hover:bg-red-500 hover:text-white transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
@@ -253,8 +318,36 @@ export const SyncSettings = () => {
               </button>
             </div>
 
+            {showGistIdInput && (
+              <div className="p-4 bg-gray-50 border border-gray-200 space-y-3">
+                <p className="text-[11px] opacity-70">
+                  If you uploaded data from another device, enter the Gist ID to download it here.
+                  You can find the Gist ID in the URL when viewing your Gist on GitHub.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="text"
+                    value={gistIdInput}
+                    onChange={(e) => setGistIdInput(e.target.value)}
+                    placeholder="e.g., abc123def456..."
+                    className="flex-1 border-2 border-black px-4 py-3 text-[13px] focus:outline-none focus:border-black min-h-[44px]"
+                    disabled={isSyncing}
+                  />
+                  <button
+                    onClick={handleDownloadWithGistId}
+                    disabled={isSyncing || !gistIdInput.trim()}
+                    className="text-[10px] font-black tracking-[0.3em] uppercase bg-black text-white px-6 py-3 hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px]"
+                  >
+                    <Download size={14} />
+                    DOWNLOAD
+                  </button>
+                </div>
+              </div>
+            )}
+
             <p className="text-[10px] opacity-40">
               Tip: Upload your data on one device, then download on another device to sync.
+              The system will automatically find your existing Gist.
             </p>
           </div>
         )}

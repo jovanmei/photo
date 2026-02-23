@@ -18,6 +18,7 @@ interface GistResponse {
     };
   };
   updated_at: string;
+  description: string;
 }
 
 interface SyncStatus {
@@ -94,6 +95,38 @@ export const GistSyncService = {
     }
   },
 
+  findExistingGist: async (): Promise<string | null> => {
+    const token = GistSyncService.getToken();
+    if (!token) return null;
+
+    try {
+      const response = await fetch(GIST_API_URL, {
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+        }
+      });
+
+      if (!response.ok) return null;
+
+      const gists: GistResponse[] = await response.json();
+      
+      const photoGalleryGist = gists.find(gist => 
+        gist.files[GIST_FILENAME] && 
+        gist.description?.includes('Photo Gallery')
+      );
+
+      if (photoGalleryGist) {
+        GistSyncService.setGistId(photoGalleryGist.id);
+        return photoGalleryGist.id;
+      }
+
+      return null;
+    } catch {
+      return null;
+    }
+  },
+
   createGist: async (data: any): Promise<{ id: string; url: string }> => {
     const token = GistSyncService.getToken();
     if (!token) throw new Error('No GitHub token configured');
@@ -137,8 +170,19 @@ export const GistSyncService = {
     if (!token) throw new Error('No GitHub token configured');
     
     if (!gistId) {
+      const existingGistId = await GistSyncService.findExistingGist();
+      if (existingGistId) {
+        return GistSyncService.updateGistWithId(existingGistId, data);
+      }
       return GistSyncService.createGist(data);
     }
+
+    return GistSyncService.updateGistWithId(gistId, data);
+  },
+
+  updateGistWithId: async (gistId: string, data: any): Promise<{ id: string; url: string }> => {
+    const token = GistSyncService.getToken();
+    if (!token) throw new Error('No GitHub token configured');
 
     const response = await fetch(`${GIST_API_URL}/${gistId}`, {
       method: 'PATCH',
@@ -160,12 +204,17 @@ export const GistSyncService = {
       const errorData = await response.json().catch(() => ({}));
       if (response.status === 404) {
         GistSyncService.removeGistId();
+        const existingGistId = await GistSyncService.findExistingGist();
+        if (existingGistId) {
+          return GistSyncService.updateGistWithId(existingGistId, data);
+        }
         return GistSyncService.createGist(data);
       }
       throw new Error(errorData.message || `Failed to update Gist (${response.status})`);
     }
     
     const gist: GistResponse = await response.json();
+    GistSyncService.setGistId(gist.id);
     
     return { 
       id: gist.id, 
@@ -175,10 +224,16 @@ export const GistSyncService = {
 
   downloadGist: async (): Promise<any> => {
     const token = GistSyncService.getToken();
-    const gistId = GistSyncService.getGistId();
+    let gistId = GistSyncService.getGistId();
     
     if (!token) throw new Error('No GitHub token configured');
-    if (!gistId) throw new Error('No Gist ID found. Please upload data first.');
+    
+    if (!gistId) {
+      gistId = await GistSyncService.findExistingGist();
+      if (!gistId) {
+        throw new Error('NO_GIST_FOUND');
+      }
+    }
 
     const response = await fetch(`${GIST_API_URL}/${gistId}`, {
       headers: {
@@ -202,6 +257,39 @@ export const GistSyncService = {
     if (!content) {
       throw new Error('No data found in Gist');
     }
+    
+    try {
+      return JSON.parse(content);
+    } catch {
+      throw new Error('Invalid JSON data in Gist');
+    }
+  },
+
+  downloadGistWithId: async (gistId: string): Promise<any> => {
+    const token = GistSyncService.getToken();
+    
+    if (!token) throw new Error('No GitHub token configured');
+
+    const response = await fetch(`${GIST_API_URL}/${gistId}`, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Failed to download Gist (${response.status})`);
+    }
+    
+    const gist: GistResponse = await response.json();
+    const content = gist.files[GIST_FILENAME]?.content;
+    
+    if (!content) {
+      throw new Error('No data found in Gist');
+    }
+
+    GistSyncService.setGistId(gistId);
     
     try {
       return JSON.parse(content);
