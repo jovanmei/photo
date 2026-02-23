@@ -16,15 +16,23 @@ export const HomeView = () => {
   return (
     <div className="min-h-screen bg-[#F2F2F2] text-black font-sans flex flex-col p-4 md:p-8 lg:p-12 overflow-hidden">
       {/* Header */}
-      <header className="flex flex-row justify-between items-center w-full relative z-20 gap-2 md:gap-4">
-        <Link to="/" className="text-lg md:text-xl font-bold tracking-tighter hover:opacity-50 transition-opacity">JOVAN ®</Link>
-        <nav className="flex items-center gap-2 md:gap-10 flex-shrink-0">
-          <Link to="/stories" className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] hover:opacity-50 transition-all">Stories</Link>
-          <Link to="/orbit" className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] hover:opacity-50 transition-all">Orbit</Link>
-          <Link to="/about" className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] hover:opacity-50 transition-all">About</Link>
-          <SoundWaveIcon isPlaying={isPlaying} onClick={togglePlay} />
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center w-full relative z-20 gap-4">
+        <Link to="/" className="text-xl font-bold tracking-tighter hover:opacity-50 transition-opacity">JOVAN ®</Link>
+        <nav className="flex items-center gap-4 md:gap-10">
+          <Link to="/stories" className="text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all">Stories</Link>
+          <Link to="/orbit" className="text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all">Orbit</Link>
+          <Link to="/about" className="text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all">About</Link>
         </nav>
+        {/* SoundWave Icon - Second row on mobile, inline on desktop */}
+        <div className="md:hidden">
+          <SoundWaveIcon isPlaying={isPlaying} onClick={togglePlay} />
+        </div>
       </header>
+
+      {/* SoundWave Icon - Desktop only, positioned absolutely */}
+      <div className="hidden md:block absolute top-8 right-8 lg:right-12 z-30">
+        <SoundWaveIcon isPlaying={isPlaying} onClick={togglePlay} />
+      </div>
 
       {/* Main Content */}
       <main className="flex-1 grid grid-cols-12 gap-4 mt-6 md:mt-12 relative pb-[35vh] md:pb-0">
