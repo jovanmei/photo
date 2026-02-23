@@ -102,11 +102,16 @@ export const SyncSettings = () => {
         ...album,
         createdAt: new Date(album.createdAt),
         photos: album.photos.map((photo: any) => ({
-          ...photo,
+          id: photo.id,
+          url: photo.url,
+          name: photo.name,
+          description: photo.description,
+          location: photo.location,
           uploadDate: new Date(photo.uploadDate)
         }))
       }));
 
+      console.log('Downloaded data:', processedData);
       saveAlbumsToStorage(processedData);
       const now = new Date().toISOString();
       setLastSyncTime(now);
@@ -151,11 +156,16 @@ export const SyncSettings = () => {
         ...album,
         createdAt: new Date(album.createdAt),
         photos: album.photos.map((photo: any) => ({
-          ...photo,
+          id: photo.id,
+          url: photo.url,
+          name: photo.name,
+          description: photo.description,
+          location: photo.location,
           uploadDate: new Date(photo.uploadDate)
         }))
       }));
 
+      console.log('Downloaded data with Gist ID:', processedData);
       saveAlbumsToStorage(processedData);
       const now = new Date().toISOString();
       setLastSyncTime(now);
