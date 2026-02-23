@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { GistSyncService } from "../utils/gistSync";
 import { useAlbums } from "../context/AlbumContext";
 import { saveAlbumsToStorage } from "../data/albums";
-import { Cloud, Download, Upload, Unlink, ExternalLink, Key, Check, AlertCircle, Link2 } from "lucide-react";
+import { Download, Upload, Unlink, ExternalLink, Key, Check, AlertCircle, Link2 } from "lucide-react";
 
 export const SyncSettings = () => {
   const { albums } = useAlbums();
@@ -111,13 +111,15 @@ export const SyncSettings = () => {
         }))
       }));
 
-      console.log('Downloaded data:', processedData);
+      console.log('Downloaded data with Gist ID:', processedData);
       saveAlbumsToStorage(processedData);
       const now = new Date().toISOString();
       setLastSyncTime(now);
       
       const status = GistSyncService.getSyncStatus();
       setGistUrl(status.gistUrl);
+      setShowGistIdInput(false);
+      setGistIdInput("");
       
       toast.success(`Downloaded ${processedData.length} album(s) from cloud! Refreshing...`, {
         duration: 2000
@@ -165,7 +167,6 @@ export const SyncSettings = () => {
         }))
       }));
 
-      console.log('Downloaded data with Gist ID:', processedData);
       saveAlbumsToStorage(processedData);
       const now = new Date().toISOString();
       setLastSyncTime(now);
@@ -199,169 +200,163 @@ export const SyncSettings = () => {
   };
 
   return (
-    <div className="border-2 border-black bg-white">
-      <div className="p-4 md:p-6 border-b border-black/10">
-        <div className="flex items-center gap-3">
-          <Cloud size={20} />
-          <h3 className="text-lg font-black tracking-tighter">Cloud Sync</h3>
-          {isConnected && (
-            <span className="text-[9px] bg-green-100 text-green-700 px-2 py-1 uppercase tracking-wider font-bold flex items-center gap-1">
-              <Check size={10} />
-              Connected
-            </span>
+    <div className="space-y-4">
+      {!isConnected ? (
+        <>
+          <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200">
+            <AlertCircle size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="text-[12px] text-blue-800">
+              <p className="font-bold mb-1">How to get a GitHub Token:</p>
+              <ol className="list-decimal list-inside space-y-1 opacity-80">
+                <li>Go to GitHub Settings → Developer settings</li>
+                <li>Click "Personal access tokens" → "Tokens (classic)"</li>
+                <li>Click "Generate new token (classic)"</li>
+                <li>Select only the "gist" permission</li>
+                <li>Copy the generated token</li>
+              </ol>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="password"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleConnect()}
+              placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+              className="flex-1 border-2 border-black px-4 py-3 text-[13px] focus:outline-none focus:border-black min-h-[44px]"
+              disabled={isValidating}
+            />
+            <button
+              onClick={handleConnect}
+              disabled={isValidating || !token.trim()}
+              className="text-[10px] font-black tracking-[0.3em] uppercase bg-black text-white px-6 py-3 hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px]"
+            >
+              {isValidating ? (
+                <>
+                  <span className="animate-spin">⏳</span>
+                  CONNECTING...
+                </>
+              ) : (
+                <>
+                  <Key size={14} />
+                  CONNECT
+                </>
+              )}
+            </button>
+          </div>
+
+          <a 
+            href="https://github.com/settings/tokens/new?scopes=gist&description=Photo%20Gallery%20Sync"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-[10px] underline opacity-60 hover:opacity-100 transition-opacity"
+          >
+            <ExternalLink size={12} />
+            Create a new GitHub token with gist permission
+          </a>
+        </>
+      ) : (
+        <>
+          <div className="flex items-center gap-2 mb-4">
+            {isConnected && (
+              <span className="text-[9px] bg-green-100 text-green-700 px-2 py-1 uppercase tracking-wider font-bold flex items-center gap-1">
+                <Check size={10} />
+                Connected
+              </span>
+            )}
+          </div>
+
+          {lastSyncTime && (
+            <div className="flex items-center gap-2 text-[10px] opacity-50">
+              <span>Last sync:</span>
+              <span>{formatDate(lastSyncTime)}</span>
+            </div>
           )}
-        </div>
-      </div>
 
-      <div className="p-4 md:p-6">
-        {!isConnected ? (
-          <div className="space-y-4">
-            <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200">
-              <AlertCircle size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
-              <div className="text-[12px] text-blue-800">
-                <p className="font-bold mb-1">How to get a GitHub Token:</p>
-                <ol className="list-decimal list-inside space-y-1 opacity-80">
-                  <li>Go to GitHub Settings → Developer settings</li>
-                  <li>Click "Personal access tokens" → "Tokens (classic)"</li>
-                  <li>Click "Generate new token (classic)"</li>
-                  <li>Select only the "gist" permission</li>
-                  <li>Copy the generated token</li>
-                </ol>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="password"
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleConnect()}
-                placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-                className="flex-1 border-2 border-black px-4 py-3 text-[13px] focus:outline-none focus:border-black min-h-[44px]"
-                disabled={isValidating}
-              />
-              <button
-                onClick={handleConnect}
-                disabled={isValidating || !token.trim()}
-                className="text-[10px] font-black tracking-[0.3em] uppercase bg-black text-white px-6 py-3 hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px]"
-              >
-                {isValidating ? (
-                  <>
-                    <span className="animate-spin">⏳</span>
-                    CONNECTING...
-                  </>
-                ) : (
-                  <>
-                    <Key size={14} />
-                    CONNECT
-                  </>
-                )}
-              </button>
-            </div>
-
-            <a 
-              href="https://github.com/settings/tokens/new?scopes=gist&description=Photo%20Gallery%20Sync"
+          {gistUrl && (
+            <a
+              href={gistUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-[10px] underline opacity-60 hover:opacity-100 transition-opacity"
             >
               <ExternalLink size={12} />
-              Create a new GitHub token with gist permission
+              View your synced data on GitHub Gist
             </a>
+          )}
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={handleUpload}
+              disabled={isSyncing}
+              className="text-[10px] font-black tracking-[0.3em] uppercase border-2 border-black px-4 md:px-6 py-3 hover:bg-black hover:text-white transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            >
+              <Upload size={14} />
+              UPLOAD TO CLOUD
+            </button>
+            
+            <button
+              onClick={handleDownload}
+              disabled={isSyncing}
+              className="text-[10px] font-black tracking-[0.3em] uppercase border-2 border-black px-4 md:px-6 py-3 hover:bg-black hover:text-white transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            >
+              <Download size={14} />
+              DOWNLOAD FROM CLOUD
+            </button>
+            
+            <button
+              onClick={() => setShowGistIdInput(!showGistIdInput)}
+              disabled={isSyncing}
+              className="text-[10px] font-black tracking-[0.3em] uppercase border-2 border-black px-4 md:px-6 py-3 hover:bg-black hover:text-white transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            >
+              <Link2 size={14} />
+              ENTER GIST ID
+            </button>
+            
+            <button
+              onClick={handleDisconnect}
+              disabled={isSyncing}
+              className="text-[10px] font-black tracking-[0.3em] uppercase text-red-500 border-2 border-red-500 px-4 md:px-6 py-3 hover:bg-red-500 hover:text-white transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            >
+              <Unlink size={14} />
+              DISCONNECT
+            </button>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {lastSyncTime && (
-              <div className="flex items-center gap-2 text-[10px] opacity-50">
-                <span>Last sync:</span>
-                <span>{formatDate(lastSyncTime)}</span>
+
+          {showGistIdInput && (
+            <div className="p-4 bg-gray-50 border border-gray-200 space-y-3">
+              <p className="text-[11px] opacity-70">
+                If you uploaded data from another device, enter the Gist ID to download it here.
+                You can find the Gist ID in the URL when viewing your Gist on GitHub.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  value={gistIdInput}
+                  onChange={(e) => setGistIdInput(e.target.value)}
+                  placeholder="e.g., abc123def456..."
+                  className="flex-1 border-2 border-black px-4 py-3 text-[13px] focus:outline-none focus:border-black min-h-[44px]"
+                  disabled={isSyncing}
+                />
+                <button
+                  onClick={handleDownloadWithGistId}
+                  disabled={isSyncing || !gistIdInput.trim()}
+                  className="text-[10px] font-black tracking-[0.3em] uppercase bg-black text-white px-6 py-3 hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px]"
+                >
+                  <Download size={14} />
+                  DOWNLOAD
+                </button>
               </div>
-            )}
-
-            {gistUrl && (
-              <a
-                href={gistUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-[10px] underline opacity-60 hover:opacity-100 transition-opacity"
-              >
-                <ExternalLink size={12} />
-                View your synced data on GitHub Gist
-              </a>
-            )}
-
-            <div className="flex flex-wrap gap-3">
-              <button
-                onClick={handleUpload}
-                disabled={isSyncing}
-                className="text-[10px] font-black tracking-[0.3em] uppercase border-2 border-black px-4 md:px-6 py-3 hover:bg-black hover:text-white transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-              >
-                <Upload size={14} />
-                UPLOAD TO CLOUD
-              </button>
-              
-              <button
-                onClick={handleDownload}
-                disabled={isSyncing}
-                className="text-[10px] font-black tracking-[0.3em] uppercase border-2 border-black px-4 md:px-6 py-3 hover:bg-black hover:text-white transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-              >
-                <Download size={14} />
-                DOWNLOAD FROM CLOUD
-              </button>
-              
-              <button
-                onClick={() => setShowGistIdInput(!showGistIdInput)}
-                disabled={isSyncing}
-                className="text-[10px] font-black tracking-[0.3em] uppercase border-2 border-black px-4 md:px-6 py-3 hover:bg-black hover:text-white transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-              >
-                <Link2 size={14} />
-                ENTER GIST ID
-              </button>
-              
-              <button
-                onClick={handleDisconnect}
-                disabled={isSyncing}
-                className="text-[10px] font-black tracking-[0.3em] uppercase text-red-500 border-2 border-red-500 px-4 md:px-6 py-3 hover:bg-red-500 hover:text-white transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-              >
-                <Unlink size={14} />
-                DISCONNECT
-              </button>
             </div>
+          )}
 
-            {showGistIdInput && (
-              <div className="p-4 bg-gray-50 border border-gray-200 space-y-3">
-                <p className="text-[11px] opacity-70">
-                  If you uploaded data from another device, enter the Gist ID to download it here.
-                  You can find the Gist ID in the URL when viewing your Gist on GitHub.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    type="text"
-                    value={gistIdInput}
-                    onChange={(e) => setGistIdInput(e.target.value)}
-                    placeholder="e.g., abc123def456..."
-                    className="flex-1 border-2 border-black px-4 py-3 text-[13px] focus:outline-none focus:border-black min-h-[44px]"
-                    disabled={isSyncing}
-                  />
-                  <button
-                    onClick={handleDownloadWithGistId}
-                    disabled={isSyncing || !gistIdInput.trim()}
-                    className="text-[10px] font-black tracking-[0.3em] uppercase bg-black text-white px-6 py-3 hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px]"
-                  >
-                    <Download size={14} />
-                    DOWNLOAD
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <p className="text-[10px] opacity-40">
-              Tip: Upload your data on one device, then download on another device to sync.
-              The system will automatically find your existing Gist.
-            </p>
-          </div>
-        )}
-      </div>
+          <p className="text-[10px] opacity-40">
+            Tip: Upload your data on one device, then download on another device to sync.
+            The system will automatically find your existing Gist.
+          </p>
+        </>
+      )}
     </div>
   );
 };

@@ -11,6 +11,8 @@ interface AlbumContextType {
   updatePhoto: (albumId: string, photoId: string, updates: Partial<Photo>) => void;
   deletePhoto: (albumId: string, photoId: string) => void;
   reorderPhotos: (albumId: string, photoIds: string[]) => void;
+  reorderAlbums: (albumIds: string[]) => void;
+  movePhotoToAlbum: (photoId: string, fromAlbumId: string, toAlbumId: string) => void;
 }
 
 export const AlbumContext = React.createContext<AlbumContextType | undefined>(undefined);
@@ -86,6 +88,52 @@ export const AlbumProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }));
   }, []);
 
+  // 新增：相册排序功能
+  const reorderAlbums = React.useCallback((albumIds: string[]) => {
+    setAlbums(prev => {
+      const albumMap = new Map(prev.map(a => [a.id, a]));
+      return albumIds
+        .map(id => albumMap.get(id))
+        .filter((a): a is Album => a !== undefined);
+    });
+  }, []);
+
+  // 新增：跨相册移动照片功能
+  const movePhotoToAlbum = React.useCallback((photoId: string, fromAlbumId: string, toAlbumId: string) => {
+    if (fromAlbumId === toAlbumId) return;
+    
+    setAlbums(prev => {
+      let photoToMove: Photo | undefined;
+      
+      // 从源相册中移除照片
+      const updatedAlbums = prev.map(album => {
+        if (album.id === fromAlbumId) {
+          photoToMove = album.photos.find(p => p.id === photoId);
+          return {
+            ...album,
+            photos: album.photos.filter(p => p.id !== photoId)
+          };
+        }
+        return album;
+      });
+      
+      // 如果找到了照片，添加到目标相册
+      if (photoToMove) {
+        return updatedAlbums.map(album => {
+          if (album.id === toAlbumId) {
+            return {
+              ...album,
+              photos: [...album.photos, photoToMove!]
+            };
+          }
+          return album;
+        });
+      }
+      
+      return prev;
+    });
+  }, []);
+
   return (
     <AlbumContext.Provider value={{ 
       albums, 
@@ -96,7 +144,9 @@ export const AlbumProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       addPhotosToAlbum, 
       updatePhoto, 
       deletePhoto,
-      reorderPhotos 
+      reorderPhotos,
+      reorderAlbums,
+      movePhotoToAlbum
     }}>
       {children}
     </AlbumContext.Provider>

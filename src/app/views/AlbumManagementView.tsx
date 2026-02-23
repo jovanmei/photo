@@ -8,17 +8,20 @@ import { CloudinaryUpload } from "../components/CloudinaryUpload";
 import { CloudinaryConfigCheck } from "../components/CloudinaryConfigCheck";
 import { SyncSettings } from "../components/SyncSettings";
 import { DataExport } from "../components/DataExport";
+import { CollapsibleSection } from "../components/CollapsibleSection";
 import { isCloudinaryConfigured, UploadResult } from "../utils/cloudinary";
 import { toast } from "sonner";
-import { Upload, Edit2, GripVertical, Save, X, Download, FileUp } from "lucide-react";
+import { Upload, Edit2, GripVertical, Save, X, Download, FileUp, Move, FolderOpen, Cloud, FileCode } from "lucide-react";
 
 interface DragState {
   draggedPhotoId: string | null;
   draggedOverPhotoId: string | null;
+  draggedPhotoAlbumId: string | null;
+  draggedOverAlbumId: string | null;
 }
 
 export const AlbumManagementView = () => {
-  const { albums, addAlbum, updateAlbum, deleteAlbum, addPhotosToAlbum, updatePhoto, deletePhoto, reorderPhotos } = useAlbums();
+  const { albums, addAlbum, updateAlbum, deleteAlbum, addPhotosToAlbum, updatePhoto, deletePhoto, reorderPhotos, reorderAlbums, movePhotoToAlbum } = useAlbums();
   const [showCreateForm, setShowCreateForm] = React.useState(false);
   const [newAlbumTitle, setNewAlbumTitle] = React.useState("");
   const [newAlbumDescription, setNewAlbumDescription] = React.useState("");
@@ -35,9 +38,14 @@ export const AlbumManagementView = () => {
   const [editAlbumDescription, setEditAlbumDescription] = React.useState("");
   const [editAlbumErrors, setEditAlbumErrors] = React.useState<{ title?: string; description?: string }>({});
   const [reorderingAlbumId, setReorderingAlbumId] = React.useState<string | null>(null);
+  const [reorderingAlbumsMode, setReorderingAlbumsMode] = React.useState(false);
+  const [movingPhotoMode, setMovingPhotoMode] = React.useState(false);
+  const [selectedPhotoToMove, setSelectedPhotoToMove] = React.useState<{ photo: Photo; fromAlbumId: string } | null>(null);
   const [dragState, setDragState] = React.useState<DragState>({
     draggedPhotoId: null,
-    draggedOverPhotoId: null
+    draggedOverPhotoId: null,
+    draggedPhotoAlbumId: null,
+    draggedOverAlbumId: null
   });
   const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
 
@@ -202,11 +210,49 @@ export const AlbumManagementView = () => {
 
   const toggleReorderMode = React.useCallback((albumId: string) => {
     setReorderingAlbumId(prev => prev === albumId ? null : albumId);
-    setDragState({ draggedPhotoId: null, draggedOverPhotoId: null });
+    setDragState({ draggedPhotoId: null, draggedOverPhotoId: null, draggedPhotoAlbumId: null, draggedOverAlbumId: null });
   }, []);
 
-  const handleDragStart = React.useCallback((photoId: string) => {
-    setDragState(prev => ({ ...prev, draggedPhotoId: photoId }));
+  // 相册排序功能
+  const toggleAlbumsReorderMode = React.useCallback(() => {
+    setReorderingAlbumsMode(prev => !prev);
+    setMovingPhotoMode(false);
+    setDragState({ draggedPhotoId: null, draggedOverPhotoId: null, draggedPhotoAlbumId: null, draggedOverAlbumId: null });
+  }, []);
+
+  // 跨相册移动照片模式
+  const toggleMovingPhotoMode = React.useCallback(() => {
+    setMovingPhotoMode(prev => !prev);
+    setReorderingAlbumsMode(false);
+    setSelectedPhotoToMove(null);
+  }, []);
+
+  const selectPhotoToMove = React.useCallback((photo: Photo, fromAlbumId: string) => {
+    setSelectedPhotoToMove({ photo, fromAlbumId });
+  }, []);
+
+  const movePhotoToTargetAlbum = React.useCallback((toAlbumId: string) => {
+    if (!selectedPhotoToMove) return;
+    if (selectedPhotoToMove.fromAlbumId === toAlbumId) {
+      toast.error("Cannot move photo to the same album");
+      return;
+    }
+
+    if (confirm(`Move "${selectedPhotoToMove.photo.name}" to this album?`)) {
+      movePhotoToAlbum(selectedPhotoToMove.photo.id, selectedPhotoToMove.fromAlbumId, toAlbumId);
+      toast.success("Photo moved successfully!");
+      setSelectedPhotoToMove(null);
+      setMovingPhotoMode(false);
+    }
+  }, [selectedPhotoToMove, movePhotoToAlbum]);
+
+  // 照片拖拽排序
+  const handleDragStart = React.useCallback((photoId: string, albumId: string) => {
+    setDragState(prev => ({ 
+      ...prev, 
+      draggedPhotoId: photoId,
+      draggedPhotoAlbumId: albumId 
+    }));
   }, []);
 
   const handleDragOver = React.useCallback((e: React.DragEvent, photoId: string) => {
@@ -231,11 +277,42 @@ export const AlbumManagementView = () => {
       toast.success("Photo order updated!");
     }
 
-    setDragState({ draggedPhotoId: null, draggedOverPhotoId: null });
+    setDragState({ draggedPhotoId: null, draggedOverPhotoId: null, draggedPhotoAlbumId: null, draggedOverAlbumId: null });
   }, [albums, dragState.draggedPhotoId, reorderPhotos]);
 
+  // 相册拖拽排序
+  const handleAlbumDragStart = React.useCallback((albumId: string) => {
+    setDragState(prev => ({ ...prev, draggedPhotoAlbumId: albumId }));
+  }, []);
+
+  const handleAlbumDragOver = React.useCallback((e: React.DragEvent, albumId: string) => {
+    e.preventDefault();
+    setDragState(prev => ({ ...prev, draggedOverAlbumId: albumId }));
+  }, []);
+
+  const handleAlbumDrop = React.useCallback((targetAlbumId: string) => {
+    if (!dragState.draggedPhotoAlbumId || dragState.draggedPhotoAlbumId === targetAlbumId) {
+      setDragState({ draggedPhotoId: null, draggedOverPhotoId: null, draggedPhotoAlbumId: null, draggedOverAlbumId: null });
+      return;
+    }
+
+    const albumIds = albums.map(a => a.id);
+    const draggedIndex = albumIds.indexOf(dragState.draggedPhotoAlbumId);
+    const targetIndex = albumIds.indexOf(targetAlbumId);
+
+    if (draggedIndex !== -1 && targetIndex !== -1) {
+      const [draggedAlbumId] = albumIds.splice(draggedIndex, 1);
+      albumIds.splice(targetIndex, 0, draggedAlbumId);
+      
+      reorderAlbums(albumIds);
+      toast.success("Album order updated!");
+    }
+
+    setDragState({ draggedPhotoId: null, draggedOverPhotoId: null, draggedPhotoAlbumId: null, draggedOverAlbumId: null });
+  }, [albums, dragState.draggedPhotoAlbumId, reorderAlbums]);
+
   const handleDragEnd = React.useCallback(() => {
-    setDragState({ draggedPhotoId: null, draggedOverPhotoId: null });
+    setDragState({ draggedPhotoId: null, draggedOverPhotoId: null, draggedPhotoAlbumId: null, draggedOverAlbumId: null });
   }, []);
 
   const exportData = React.useCallback(() => {
@@ -352,6 +429,59 @@ export const AlbumManagementView = () => {
           </div>
         </div>
 
+        {/* Album Reorder and Photo Move Controls */}
+        <div className="mb-8 p-4 border-2 border-black bg-white">
+          <h3 className="text-sm font-black tracking-tighter mb-4">Advanced Operations</h3>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={toggleAlbumsReorderMode}
+              className={`text-[10px] font-black tracking-[0.2em] uppercase px-4 py-2 border-2 transition-all min-h-[44px] flex items-center gap-2 ${
+                reorderingAlbumsMode 
+                  ? 'bg-black text-white border-black' 
+                  : 'border-black hover:bg-black hover:text-white'
+              }`}
+            >
+              <GripVertical size={14} />
+              {reorderingAlbumsMode ? '[ DONE REORDERING ALBUMS ]' : '[ REORDER ALBUMS ]'}
+            </button>
+            <button
+              onClick={toggleMovingPhotoMode}
+              className={`text-[10px] font-black tracking-[0.2em] uppercase px-4 py-2 border-2 transition-all min-h-[44px] flex items-center gap-2 ${
+                movingPhotoMode 
+                  ? 'bg-black text-white border-black' 
+                  : 'border-black hover:bg-black hover:text-white'
+              }`}
+            >
+              <Move size={14} />
+              {movingPhotoMode ? '[ CANCEL MOVE ]' : '[ MOVE PHOTOS BETWEEN ALBUMS ]'}
+            </button>
+          </div>
+          
+          {movingPhotoMode && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200">
+              <p className="text-[11px] text-blue-800">
+                <strong>Mode:</strong> Move photos between albums
+                {selectedPhotoToMove ? (
+                  <span className="block mt-1">
+                    Selected: "{selectedPhotoToMove.photo.name}" - Click on another album to move it there
+                  </span>
+                ) : (
+                  <span className="block mt-1">Click on a photo to select it, then click on the destination album</span>
+                )}
+              </p>
+            </div>
+          )}
+          
+          {reorderingAlbumsMode && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200">
+              <p className="text-[11px] text-green-800">
+                <strong>Mode:</strong> Reorder albums
+                <span className="block mt-1">Drag and drop albums to reorder them</span>
+              </p>
+            </div>
+          )}
+        </div>
+
         {/* Cloudinary Configuration Check */}
         {!isCloudinaryConfigured() && (
           <div className="mb-8">
@@ -359,14 +489,28 @@ export const AlbumManagementView = () => {
           </div>
         )}
 
-        {/* Cloud Sync Settings */}
+        {/* Cloud Sync Settings - Collapsible */}
         <div className="mb-8">
-          <SyncSettings />
+          <CollapsibleSection 
+            title="Cloud Sync" 
+            icon={<Cloud size={20} />}
+            storageKey="cloudSync"
+            defaultExpanded={false}
+          >
+            <SyncSettings />
+          </CollapsibleSection>
         </div>
 
-        {/* Data Export */}
+        {/* Data Export - Collapsible */}
         <div className="mb-8">
-          <DataExport albums={albums} />
+          <CollapsibleSection 
+            title="Export Data" 
+            icon={<FileCode size={20} />}
+            storageKey="dataExport"
+            defaultExpanded={false}
+          >
+            <DataExport albums={albums} />
+          </CollapsibleSection>
         </div>
 
         {/* Create Album Form */}
@@ -442,7 +586,26 @@ export const AlbumManagementView = () => {
               key={album.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="border-2 border-black bg-white"
+              className={`border-2 bg-white ${
+                reorderingAlbumsMode ? 'cursor-move' : ''
+              } ${
+                dragState.draggedOverAlbumId === album.id ? 'ring-2 ring-blue-500 border-blue-500' : 'border-black'
+              } ${
+                dragState.draggedPhotoAlbumId === album.id ? 'opacity-50' : ''
+              } ${
+                selectedPhotoToMove?.fromAlbumId === album.id ? 'ring-2 ring-yellow-500' : ''
+              }`}
+              draggable={reorderingAlbumsMode}
+              onDragStart={() => handleAlbumDragStart(album.id)}
+              onDragOver={(e) => handleAlbumDragOver(e, album.id)}
+              onDrop={() => {
+                if (reorderingAlbumsMode) {
+                  handleAlbumDrop(album.id);
+                } else if (movingPhotoMode && selectedPhotoToMove) {
+                  movePhotoToTargetAlbum(album.id);
+                }
+              }}
+              onDragEnd={handleDragEnd}
             >
               {/* Album Header */}
               <div className="p-4 md:p-6 border-b-2 border-black">
@@ -494,7 +657,12 @@ export const AlbumManagementView = () => {
                 ) : (
                   <div className="flex flex-col md:flex-row items-start justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="text-xl md:text-2xl font-black tracking-tighter mb-2">{album.title}</h3>
+                      <div className="flex items-center gap-3 mb-2">
+                        {reorderingAlbumsMode && (
+                          <GripVertical size={20} className="text-gray-400" />
+                        )}
+                        <h3 className="text-xl md:text-2xl font-black tracking-tighter">{album.title}</h3>
+                      </div>
                       <p className="text-[13px] opacity-60 mb-4">{album.description}</p>
                       <div className="flex flex-wrap items-center gap-4 md:gap-6 text-[10px] opacity-40 uppercase tracking-[0.2em]">
                         <span>{album.photos.length} Photos</span>
@@ -502,50 +670,65 @@ export const AlbumManagementView = () => {
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2 md:gap-3">
-                      <button
-                        onClick={() => startEditAlbum(album)}
-                        className="text-[10px] font-black tracking-[0.2em] uppercase border-2 border-black px-3 md:px-4 py-2 hover:bg-black hover:text-white transition-all flex items-center gap-2 min-h-[44px]"
-                      >
-                        <Edit2 size={14} />
-                        <span className="hidden md:inline">[ EDIT ]</span>
-                        <span className="md:hidden">EDIT</span>
-                      </button>
-                      <button
-                        onClick={() => openUploadModal(album.id)}
-                        disabled={!isCloudinaryConfigured()}
-                        className="text-[10px] font-black tracking-[0.2em] uppercase border-2 border-black px-3 md:px-4 py-2 hover:bg-black hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-h-[44px]"
-                      >
-                        <Upload size={14} />
-                        <span className="hidden md:inline">[ UPLOAD ]</span>
-                        <span className="md:hidden">UPLOAD</span>
-                      </button>
-                      <button
-                        onClick={() => handleDeleteAlbum(album.id)}
-                        className="text-[10px] font-black tracking-[0.2em] uppercase text-red-500 border-2 border-red-500 px-3 md:px-4 py-2 hover:bg-red-500 hover:text-white transition-all min-h-[44px]"
-                      >
-                        <span className="hidden md:inline">[ DELETE ]</span>
-                        <span className="md:hidden">DELETE</span>
-                      </button>
+                      {!reorderingAlbumsMode && !movingPhotoMode && (
+                        <>
+                          <button
+                            onClick={() => startEditAlbum(album)}
+                            className="text-[10px] font-black tracking-[0.2em] uppercase border-2 border-black px-3 md:px-4 py-2 hover:bg-black hover:text-white transition-all flex items-center gap-2 min-h-[44px]"
+                          >
+                            <Edit2 size={14} />
+                            <span className="hidden md:inline">[ EDIT ]</span>
+                            <span className="md:hidden">EDIT</span>
+                          </button>
+                          <button
+                            onClick={() => openUploadModal(album.id)}
+                            disabled={!isCloudinaryConfigured()}
+                            className="text-[10px] font-black tracking-[0.2em] uppercase border-2 border-black px-3 md:px-4 py-2 hover:bg-black hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-h-[44px]"
+                          >
+                            <Upload size={14} />
+                            <span className="hidden md:inline">[ UPLOAD ]</span>
+                            <span className="md:hidden">UPLOAD</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteAlbum(album.id)}
+                            className="text-[10px] font-black tracking-[0.2em] uppercase text-red-500 border-2 border-red-500 px-3 md:px-4 py-2 hover:bg-red-500 hover:text-white transition-all min-h-[44px]"
+                          >
+                            <span className="hidden md:inline">[ DELETE ]</span>
+                            <span className="md:hidden">DELETE</span>
+                          </button>
+                        </>
+                      )}
+                      {movingPhotoMode && selectedPhotoToMove?.fromAlbumId !== album.id && (
+                        <button
+                          onClick={() => movePhotoToTargetAlbum(album.id)}
+                          className="text-[10px] font-black tracking-[0.2em] uppercase bg-blue-500 text-white px-3 md:px-4 py-2 hover:bg-blue-600 transition-all flex items-center gap-2 min-h-[44px]"
+                        >
+                          <FolderOpen size={14} />
+                          MOVE HERE
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Album Photos */}
-              {album.photos.length > 0 && (
+              {album.photos.length > 0 && !reorderingAlbumsMode && (
                 <div className="p-4 md:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-60">Photos</span>
-                    <button
-                      onClick={() => toggleReorderMode(album.id)}
-                      className={`text-[10px] font-black tracking-[0.2em] uppercase px-4 py-2 border-2 transition-all min-h-[44px] ${
-                        reorderingAlbumId === album.id 
-                          ? 'bg-black text-white border-black' 
-                          : 'border-black hover:bg-black hover:text-white'
-                      }`}
-                    >
-                      {reorderingAlbumId === album.id ? '[ DONE ]' : '[ REORDER ]'}
-                    </button>
+                    {!movingPhotoMode && (
+                      <button
+                        onClick={() => toggleReorderMode(album.id)}
+                        className={`text-[10px] font-black tracking-[0.2em] uppercase px-4 py-2 border-2 transition-all min-h-[44px] ${
+                          reorderingAlbumId === album.id 
+                            ? 'bg-black text-white border-black' 
+                            : 'border-black hover:bg-black hover:text-white'
+                        }`}
+                      >
+                        {reorderingAlbumId === album.id ? '[ DONE ]' : '[ REORDER ]'}
+                      </button>
+                    )}
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                     {album.photos.map((photo, index) => (
@@ -557,25 +740,43 @@ export const AlbumManagementView = () => {
                           dragState.draggedOverPhotoId === photo.id ? 'ring-2 ring-blue-500' : ''
                         } ${
                           dragState.draggedPhotoId === photo.id ? 'opacity-50' : ''
+                        } ${
+                          selectedPhotoToMove?.photo.id === photo.id ? 'ring-2 ring-yellow-500' : ''
                         }`}
                         draggable={reorderingAlbumId === album.id}
-                        onDragStart={() => handleDragStart(photo.id)}
+                        onDragStart={() => handleDragStart(photo.id, album.id)}
                         onDragOver={(e) => handleDragOver(e, photo.id)}
                         onDrop={() => handleDrop(album.id, photo.id)}
                         onDragEnd={handleDragEnd}
+                        onClick={() => {
+                          if (movingPhotoMode && reorderingAlbumId !== album.id) {
+                            selectPhotoToMove(photo, album.id);
+                          } else if (!movingPhotoMode && reorderingAlbumId !== album.id) {
+                            navigateToPhoto(photo);
+                          }
+                        }}
                       >
                         <ImageWithFallback
                           src={photo.url}
                           alt={photo.name}
                           className="w-full h-full object-cover"
-                          onClick={() => reorderingAlbumId !== album.id && navigateToPhoto(photo)}
                         />
                         {reorderingAlbumId === album.id && (
                           <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                             <GripVertical size={24} className="text-white" />
                           </div>
                         )}
-                        {reorderingAlbumId !== album.id && (
+                        {movingPhotoMode && selectedPhotoToMove?.photo.id !== photo.id && (
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                            <span className="text-white text-[10px] font-black opacity-0 group-hover:opacity-100">SELECT</span>
+                          </div>
+                        )}
+                        {selectedPhotoToMove?.photo.id === photo.id && (
+                          <div className="absolute inset-0 bg-yellow-500/50 flex items-center justify-center">
+                            <span className="text-white text-[10px] font-black">SELECTED</span>
+                          </div>
+                        )}
+                        {reorderingAlbumId !== album.id && !movingPhotoMode && (
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
                             <div className="flex gap-2">
                               <button
