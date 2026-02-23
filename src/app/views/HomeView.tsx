@@ -71,7 +71,7 @@ export const HomeView = () => {
       </main>
 
       {/* Scroll to Stories Arrow */}
-      <div className="absolute bottom-4 md:bottom-8 left-1/4 md:left-1/6 transform -translate-x-1/2 flex flex-col items-center z-20">
+      <div className="absolute bottom-8 md:bottom-12 left-1/4 md:left-1/6 transform -translate-x-1/2 flex flex-col items-center z-20">
         <motion.button
           onClick={goToStories}
           initial={{ opacity: 0, y: -20 }}

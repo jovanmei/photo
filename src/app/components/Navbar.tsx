@@ -35,7 +35,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         JOVAN ®
       </Link>
       
-      <nav className="flex items-center gap-2 md:gap-10 flex-shrink-0">
+      <nav className="flex items-center gap-4 md:gap-10 flex-shrink-0">
         <Link 
           to="/stories" 
           className={getLinkClassName('/stories')}
