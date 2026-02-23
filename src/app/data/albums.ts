@@ -18,7 +18,7 @@ export interface Album {
 
 const STORAGE_KEY = 'photoGallery_albums';
 const STORAGE_VERSION_KEY = 'photoGallery_version';
-const CURRENT_VERSION = '2'; // Increment when data structure changes
+const CURRENT_VERSION = '3'; // Increment when data structure changes
 
 export const initialAlbums: Album[] = [
   {
@@ -32,6 +32,7 @@ export const initialAlbums: Album[] = [
         id: "p1",
         url: "https://images.unsplash.com/photo-1628889923625-e3b33f73d780?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
         name: "Panda Bamboo",
+        description: "The Panda in grayscale.",
         location: "Chengdu, China",
         uploadDate: new Date("2024-01-15")
       },
@@ -48,6 +49,25 @@ export const initialAlbums: Album[] = [
         name: "Magical Horse",
         location: "Iceland",
         uploadDate: new Date("2024-01-15")
+      },
+      {
+        id: "p8ll48ix5",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771808159/photo-gallery/1/P1160683_xclraw.jpg",
+        name: "P1160683",
+        description: "Old man and the fish",
+        uploadDate: new Date("2026-02-23")
+      },
+      {
+        id: "6vh3g3lpu",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771846458/photo-gallery/1/P1160758_bgzpkg.jpg",
+        name: "P1160758",
+        uploadDate: new Date("2026-02-23")
+      },
+      {
+        id: "jqo5c5qln",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771846466/photo-gallery/1/P1160775_spfrti.jpg",
+        name: "P1160775",
+        uploadDate: new Date("2026-02-23")
       }
     ]
   },
@@ -66,11 +86,29 @@ export const initialAlbums: Album[] = [
         uploadDate: new Date("2024-02-20")
       },
       {
+        id: "novve5b1w",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771836593/photo-gallery/2/theweeknd_glr4pv.jpg",
+        name: "theweeknd",
+        uploadDate: new Date("2026-02-23")
+      },
+      {
         id: "p5",
         url: "https://images.unsplash.com/photo-1514565131-fce0801e5785?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
         name: "Street Photography",
         location: "London, UK",
         uploadDate: new Date("2024-02-20")
+      },
+      {
+        id: "3f3ylo3dc",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771836587/photo-gallery/2/copen_sihtxc.jpg",
+        name: "copen",
+        uploadDate: new Date("2026-02-23")
+      },
+      {
+        id: "xwsvqoyoz",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771836598/photo-gallery/2/maroon5_us9rd6.jpg",
+        name: "maroon5",
+        uploadDate: new Date("2026-02-23")
       }
     ]
   },
@@ -101,6 +139,63 @@ export const initialAlbums: Album[] = [
         name: "Lake Reflection",
         location: "Banff, Canada",
         uploadDate: new Date("2024-03-10")
+      },
+      {
+        id: "26ck0c6n9",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771808193/photo-gallery/3/P1160703_ahkwfi.jpg",
+        name: "P1160703",
+        uploadDate: new Date("2026-02-23")
+      },
+      {
+        id: "x5240opa2",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771836604/photo-gallery/3/forest_vbatw4.jpg",
+        name: "forest",
+        uploadDate: new Date("2026-02-23")
+      },
+      {
+        id: "wa0ly5x8r",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771836623/photo-gallery/3/bysea_zzdmer.jpg",
+        name: "bysea",
+        uploadDate: new Date("2026-02-23")
+      }
+    ]
+  },
+  {
+    id: "zms9o7p8t",
+    title: "Life.",
+    displayTitle: "life.",
+    description: "Random things...",
+    createdAt: new Date("2026-02-23"),
+    photos: [
+      {
+        id: "lyzyygfiw",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771836708/photo-gallery/zms9o7p8t/vangogh_dmjhud.jpg",
+        name: "vangogh",
+        uploadDate: new Date("2026-02-23")
+      },
+      {
+        id: "95k8tb4m6",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771836698/photo-gallery/zms9o7p8t/church_bxliym.jpg",
+        name: "church",
+        uploadDate: new Date("2026-02-23")
+      },
+      {
+        id: "47bj7qv5v",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771836714/photo-gallery/zms9o7p8t/statue_o4kanj.jpg",
+        name: "statue",
+        uploadDate: new Date("2026-02-23")
+      },
+      {
+        id: "q1ab7ghhz",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771836720/photo-gallery/zms9o7p8t/sunflower_omeysp.jpg",
+        name: "sunflower",
+        uploadDate: new Date("2026-02-23")
+      },
+      {
+        id: "j6bf7kr8y",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771836728/photo-gallery/zms9o7p8t/book_and_lake_sotziz.jpg",
+        name: "book and lake",
+        uploadDate: new Date("2026-02-23")
       }
     ]
   }
