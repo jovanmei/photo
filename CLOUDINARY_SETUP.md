@@ -103,6 +103,31 @@ npm run dev
 
 ---
 
+## 第五步：GitHub Pages 部署配置
+
+如果要将应用部署到 GitHub Pages，需要通过 GitHub Secrets 配置环境变量，而不是使用本地的 `.env.local` 文件：
+
+### 1. 添加 GitHub Secrets
+
+1. 访问你的 GitHub 仓库
+2. 点击 **Settings**
+3. 在左侧边栏中，点击 **Secrets and variables** → **Actions**
+4. 点击 **New repository secret**
+5. 添加第一个 Secret：
+   - **Name**: `VITE_CLOUDINARY_CLOUD_NAME`
+   - **Value**: 你的 Cloudinary Cloud Name（例如：dxabc1234）
+6. 点击 **Add secret**
+7. 添加第二个 Secret：
+   - **Name**: `VITE_CLOUDINARY_UPLOAD_PRESET`
+   - **Value**: 你的 Cloudinary Upload Preset（例如：photo-gallery-unsigned）
+8. 点击 **Add secret**
+
+### 2. 触发重新部署
+
+添加 Secrets 后，推送代码到 main 分支，GitHub Actions 将自动重新构建并部署应用，此时 Cloudinary 配置将正确加载！
+
+---
+
 ## 功能特性
 
 ### 支持的文件格式

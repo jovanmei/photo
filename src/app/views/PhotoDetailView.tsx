@@ -96,12 +96,12 @@ export const PhotoDetailView = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
             key={currentPhoto.id}
-            className="aspect-[4/3] bg-neutral-200 overflow-hidden shadow-2xl"
+            className="bg-neutral-200 overflow-hidden shadow-2xl"
           >
             <ImageWithFallback 
               src={currentPhoto.url} 
               alt={currentPhoto.name}
-              className="w-full h-full object-cover"
+              className="w-full h-auto object-contain"
             />
           </motion.div>
         </div>
@@ -135,7 +135,7 @@ export const PhotoDetailView = () => {
             <div className="flex flex-col items-end gap-4 max-w-xs">
               <span className="text-[10px] opacity-40">[{currentIndex}]</span>
               <p className="text-[13px] leading-relaxed">
-                Every photograph is a ray of light that time leaves behind in this world, a way to capture those fleeting yet eternal moments. Where light and shadow meet, we encounter another version of ourselves.
+                {currentPhoto.description || "Every photograph is a ray of light that time leaves behind in this world, a way to capture those fleeting yet eternal moments. Where light and shadow meet, we encounter another version of ourselves."}
               </p>
             </div>
           </div>
@@ -149,12 +149,12 @@ export const PhotoDetailView = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="aspect-video bg-neutral-200 overflow-hidden shadow-2xl"
+            className="bg-neutral-200 overflow-hidden shadow-2xl"
         >
           <ImageWithFallback 
             src={prevPhoto.url} 
             alt={prevPhoto.name}
-            className="w-full h-full object-cover"
+            className="w-full h-auto object-contain"
           />
         </motion.div>
       </div>

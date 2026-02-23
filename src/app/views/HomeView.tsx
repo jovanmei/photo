@@ -16,18 +16,18 @@ export const HomeView = () => {
   return (
     <div className="min-h-screen bg-[#F2F2F2] text-black font-sans flex flex-col p-4 md:p-8 lg:p-12 overflow-hidden">
       {/* Header */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center w-full relative z-20 gap-4">
-        <Link to="/" className="text-xl font-bold tracking-tighter hover:opacity-50 transition-opacity">JOVAN ®</Link>
-        <nav className="flex items-center gap-4 md:gap-10">
-          <Link to="/stories" className="text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all after:content-[''] after:block after:h-px after:w-0 hover:after:w-full after:bg-black after:transition-all">Stories</Link>
-          <Link to="/orbit" className="text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all after:content-[''] after:block after:h-px after:w-0 hover:after:w-full after:bg-black after:transition-all">Orbit</Link>
-          <Link to="/about" className="text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all after:content-[''] after:block after:h-px after:w-0 hover:after:w-full after:bg-black after:transition-all">About</Link>
+      <header className="flex flex-row justify-between items-center w-full relative z-20 gap-2 md:gap-4">
+        <Link to="/" className="text-lg md:text-xl font-bold tracking-tighter hover:opacity-50 transition-opacity">JOVAN ®</Link>
+        <nav className="flex items-center gap-2 md:gap-10 flex-shrink-0">
+          <Link to="/stories" className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] hover:opacity-50 transition-all">Stories</Link>
+          <Link to="/orbit" className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] hover:opacity-50 transition-all">Orbit</Link>
+          <Link to="/about" className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] hover:opacity-50 transition-all">About</Link>
           <SoundWaveIcon isPlaying={isPlaying} onClick={togglePlay} />
         </nav>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 grid grid-cols-12 gap-4 mt-8 md:mt-12 relative">
+      <main className="flex-1 grid grid-cols-12 gap-4 mt-6 md:mt-12 relative pb-[35vh] md:pb-0">
         {/* Left Image Column */}
         <div className="col-span-12 md:col-span-4 lg:col-span-3 z-10">
           <motion.div 
@@ -47,7 +47,6 @@ export const HomeView = () => {
         {/* Right Text Column */}
         <div className="col-span-12 md:col-span-5 md:col-start-8 lg:col-span-4 lg:col-start-9 flex flex-col gap-4 z-10 mt-4 md:mt-0">
           <div className="flex gap-4 items-start">
-            {/* <span className="text-[10px] opacity-60 mt-1">[1]</span> */}
             <p className="text-sm md:text-[13px] leading-relaxed max-w-sm">
               I'm not great with words. That's why I take photos. Every image here has a story. Someone I met, a place I walked through, a moment I didn't expect but couldn't let pass. This is more than a portfolio. It's what I want to remember, and maybe, what you'll feel something from too.
             </p>
@@ -58,8 +57,6 @@ export const HomeView = () => {
         <div className="absolute bottom-0 right-0 left-0 pointer-events-none flex flex-col items-end z-0">
           <div className="flex items-center gap-4 md:gap-12 w-full justify-between mb-2 md:mb-4">
              <div className="flex gap-4 md:gap-8 text-[10px] opacity-40">
-                {/* <span>[ ↓ ]</span> */}
-                {/* <span>[2]</span> */}
              </div>
              <div className="h-[40px] md:h-[60px] w-px bg-black/10"></div>
           </div>
