@@ -88,7 +88,7 @@ export const PhotoDetailView = () => {
       </header>
 
       {/* Top Layout Grid */}
-      <div className="grid grid-cols-12 gap-8 items-start relative">
+      <div className="grid grid-cols-12 gap-8 items-start relative px-2">
         {/* Left Column: Large Image */}
         <div className="col-span-12 md:col-span-8">
           <motion.div 
