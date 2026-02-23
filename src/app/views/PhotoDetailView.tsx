@@ -96,12 +96,12 @@ export const PhotoDetailView = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
             key={currentPhoto.id}
-            className="bg-neutral-200 overflow-hidden shadow-2xl"
+            className="shadow-2xl"
           >
             <ImageWithFallback 
               src={currentPhoto.url} 
               alt={currentPhoto.name}
-              className="w-full h-auto object-contain"
+              className="w-full h-auto object-contain block"
             />
           </motion.div>
         </div>
@@ -142,25 +142,10 @@ export const PhotoDetailView = () => {
         </div>
       </div>
 
-      {/* Second Image - Scrolling Content */}
-      <div className="w-full">
-        <motion.div 
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="bg-neutral-200 overflow-hidden shadow-2xl"
-        >
-          <ImageWithFallback 
-            src={prevPhoto.url} 
-            alt={prevPhoto.name}
-            className="w-full h-auto object-contain"
-          />
-        </motion.div>
-      </div>
+
 
       {/* Navigation Footer */}
-      <footer className="w-full flex justify-between items-end border-t border-black/10 pt-8 mt-32 relative z-10">
+      <footer className="w-full flex justify-between items-end border-t border-black/10 pt-2 mt-4 relative z-10">
          <span className="text-[10px] font-black tracking-[0.4em] uppercase">{String(currentIndex).padStart(2, '0')} / {String(totalPhotos).padStart(2, '0')}</span>
          <div className="flex gap-12 items-center">
             <button 
