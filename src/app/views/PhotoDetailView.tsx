@@ -123,7 +123,7 @@ export const PhotoDetailView = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.6 }}
                 transition={{ delay: 0.5 }}
-                className="text-[10px] uppercase tracking-widest mt-2"
+                className="text-sm md:text-base uppercase tracking-widest mt-2"
               >
                 {currentPhoto.location}
               </motion.span>
@@ -132,9 +132,9 @@ export const PhotoDetailView = () => {
 
           <div className="w-full text-right mt-12 flex flex-col items-end gap-6">
             <span className="text-[10px] opacity-40 uppercase tracking-widest">[ ↓ ]</span>
-            <div className="flex flex-col items-end gap-4 max-w-xs">
+            <div className="flex flex-col items-end gap-4 max-w-md">
               <span className="text-[10px] opacity-40">[{currentIndex}]</span>
-              <p className="text-[13px] leading-relaxed">
+              <p className="text-base md:text-lg leading-relaxed">
                 {currentPhoto.description || "Every photograph is a ray of light that time leaves behind in this world, a way to capture those fleeting yet eternal moments. Where light and shadow meet, we encounter another version of ourselves."}
               </p>
             </div>
