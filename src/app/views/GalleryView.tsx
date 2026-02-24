@@ -152,7 +152,7 @@ export const GalleryView = () => {
       )}
 
       {/* Main Content Container */}
-      <div className="flex-1 flex flex-col items-center justify-center -mt-14 md:mt-0">
+      <div className="flex-1 flex flex-col items-center justify-center -mt-15 md:mt-0">
         <div className="flex items-center justify-center gap-2 md:gap-8 lg:gap-16 w-full">
           <button 
             onClick={handlePrevPhoto}
