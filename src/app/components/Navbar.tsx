@@ -27,15 +27,15 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-2 md:gap-4 mb-4 md:mb-8 lg:mb-12">
+    <header className="flex flex-row md:flex-row justify-between items-center w-full gap-4 md:gap-4 pt-4 md:pt-0 mb-4 md:mb-8 lg:mb-12">
       <Link 
         to="/" 
-        className="text-lg md:text-xl font-bold tracking-tighter hover:opacity-50 transition-opacity"
+        className="text-base md:text-xl font-bold tracking-tighter hover:opacity-50 transition-opacity leading-none"
       >
         JOVAN ®
       </Link>
       
-      <nav className="flex items-center gap-4 md:gap-10 flex-shrink-0">
+      <nav className="flex items-center gap-6 md:gap-10 flex-shrink-0">
         <Link 
           to="/stories" 
           className={getLinkClassName('/stories')}
