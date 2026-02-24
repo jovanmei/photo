@@ -29,11 +29,11 @@ export const PhotoDetailView = () => {
   const handleClose = React.useCallback(() => {
     setIsClosing(true);
     setTimeout(() => {
-      navigate(-1);
       const previousPath = location.state?.from || '/stories';
+      navigate(previousPath);
       setTimeout(() => {
         restoreScrollPosition(previousPath);
-      }, 50);
+      }, 100);
     }, 250);
   }, [navigate, location]);
 
@@ -61,18 +61,35 @@ export const PhotoDetailView = () => {
 
   return (
     <motion.div 
-      className="min-h-screen bg-[#F2F2F2] text-black font-sans flex flex-col p-8 md:p-12 gap-24"
+      className="min-h-screen bg-[#F2F2F2] text-black font-sans flex flex-col p-4 md:p-8 lg:p-12 gap-24"
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: isClosing ? 0 : 1, scale: isClosing ? 0.98 : 1 }}
       transition={{ duration: 0.25, ease: "easeInOut" }}
     >
-      {/* Top Header with Close Button */}
-      <Navbar showCloseButton onClose={goHome} />
+      {/* Top Header with Close Button - 桌面端 */}
+      <div className="hidden md:block">
+        <Navbar showCloseButton onClose={handleClose} />
+      </div>
+
+      {/* Mobile Header - 仅品牌标识 */}
+      <div className="md:hidden">
+        <Navbar />
+      </div>
 
       {/* Top Layout Grid */}
       <div className="grid grid-cols-12 gap-8 items-start relative">
         {/* Left Column: Large Image */}
         <div className="col-span-12 md:col-span-8">
+          {/* 移动端关闭按钮 - 图片上方靠右 */}
+          <div className="md:hidden flex justify-end mb-4">
+            <button 
+              onClick={handleClose}
+              className="text-[10px] font-bold uppercase tracking-[0.2em] hover:opacity-50 transition-all cursor-pointer"
+              aria-label="Close"
+            >
+              [ CLOSE ]
+            </button>
+          </div>
           <motion.div 
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
