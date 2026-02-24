@@ -131,7 +131,7 @@ export const GalleryView = () => {
 
       {/* Thumbnail Row */}
       {currentAlbum.photos.length > 0 && (
-        <div className="w-full flex justify-center gap-[2px] mb-8">
+        <div className="w-full flex justify-center gap-[2px] mt-10 md:mt-0 mb-8">
           {currentAlbum.photos.map((photo, i) => (
             <motion.div 
               key={photo.id}
@@ -152,7 +152,7 @@ export const GalleryView = () => {
       )}
 
       {/* Main Content Container */}
-      <div className="flex-1 flex flex-col items-center justify-center">
+      <div className="flex-1 flex flex-col items-center justify-center -mt-14 md:mt-0">
         <div className="flex items-center justify-center gap-2 md:gap-8 lg:gap-16 w-full">
           <button 
             onClick={handlePrevPhoto}
