@@ -13,6 +13,9 @@ export const GalleryView = () => {
   const location = useLocation();
   const { albums } = useAlbums();
   
+  const thumbnailRowRef = React.useRef<HTMLDivElement>(null);
+  const thumbnailRefs = React.useRef<(HTMLDivElement | null)[]>([]);
+  
   const [currentAlbumIndex, setCurrentAlbumIndex] = React.useState(() => {
     try {
       if (location.state?.selectedAlbumIndex !== undefined) {
@@ -82,6 +85,29 @@ export const GalleryView = () => {
     navigate("/");
   }, [navigate]);
 
+  const scrollToThumbnail = React.useCallback((index: number) => {
+    const container = thumbnailRowRef.current;
+    const thumbnail = thumbnailRefs.current[index];
+    
+    if (!container || !thumbnail) return;
+    
+    const containerWidth = container.offsetWidth;
+    const thumbnailWidth = thumbnail.offsetWidth;
+    const thumbnailLeft = thumbnail.offsetLeft;
+    
+    const scrollLeft = thumbnailLeft - (containerWidth / 2) + (thumbnailWidth / 2);
+    
+    container.scrollTo({
+      left: Math.max(0, scrollLeft),
+      behavior: 'smooth'
+    });
+  }, []);
+
+  const handleThumbnailClick = React.useCallback((index: number) => {
+    setCurrentPhotoIndex(index);
+    scrollToThumbnail(index);
+  }, [scrollToThumbnail]);
+
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') handlePrevPhoto();
@@ -124,6 +150,10 @@ export const GalleryView = () => {
     restoreScrollPosition(location.pathname);
   }, [location.pathname]);
 
+  React.useEffect(() => {
+    scrollToThumbnail(currentPhotoIndex);
+  }, [currentPhotoIndex, scrollToThumbnail]);
+
   return (
     <div className="min-h-screen bg-[#F2F2F2] text-black font-sans flex flex-col p-4 md:p-8 lg:p-12 relative overflow-hidden">
       {/* Top Navigation */}
@@ -131,15 +161,24 @@ export const GalleryView = () => {
 
       {/* Thumbnail Row */}
       {currentAlbum.photos.length > 0 && (
-        <div className="w-full flex justify-center gap-[2px] mt-10 md:mt-0 mb-8">
+        <div 
+          ref={thumbnailRowRef}
+          className="w-full flex justify-start gap-[2px] mt-10 md:mt-1 mb-8 overflow-x-auto scrollbar-hide scroll-smooth px-2"
+          style={{ 
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch'
+          }}
+        >
           {currentAlbum.photos.map((photo, i) => (
             <motion.div 
               key={photo.id}
+              ref={(el) => { thumbnailRefs.current[i] = el; }}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.05 }}
-              onClick={() => setCurrentPhotoIndex(i)}
-              className={`flex-shrink-0 w-[13%] aspect-square bg-neutral-200 overflow-hidden cursor-pointer transition-all ${i === currentPhotoIndex ? 'ring-2 ring-black ring-offset-2' : ''}`}
+              onClick={() => handleThumbnailClick(i)}
+              className={`flex-shrink-0 w-[25%] md:w-[13%] aspect-square bg-neutral-200 overflow-hidden cursor-pointer transition-all ${i === currentPhotoIndex ? 'ring-2 ring-black ring-offset-2' : 'opacity-70 hover:opacity-100'}`}
             >
               <ImageWithFallback 
                 src={photo.url} 
@@ -152,7 +191,7 @@ export const GalleryView = () => {
       )}
 
       {/* Main Content Container */}
-      <div className="flex-1 flex flex-col items-center justify-center -mt-15 md:mt-0">
+      <div className="flex-1 flex flex-col items-center justify-center -mt-15 md:mt-4">
         <div className="flex items-center justify-center gap-2 md:gap-8 lg:gap-16 w-full">
           <button 
             onClick={handlePrevPhoto}

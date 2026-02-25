@@ -55,7 +55,7 @@ export const OrbitView = () => {
       </motion.div>
 
       {/* Album Grid */}
-      <div className="flex flex-col gap-16 items-center">
+      <div className="grid grid-cols-2 gap-6 md:gap-8 lg:gap-12">
         {albums.map((album, index) => {
           const coverPhoto = album.photos.length > 0 ? album.photos[0] : null;
           
@@ -65,10 +65,10 @@ export const OrbitView = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="group cursor-pointer flex flex-col md:flex-row items-center gap-10 max-w-4xl w-full"
+              className="group cursor-pointer flex flex-col items-center gap-4 md:gap-6"
               onClick={() => navigate('/stories', { state: { selectedAlbumIndex: index } })}
             >
-              <div className="w-[50vw] md:w-[25vw] aspect-square bg-neutral-200 overflow-hidden shadow-2xl flex-shrink-0 relative">
+              <div className="w-full md:w-[25vw] aspect-square bg-neutral-200 overflow-hidden shadow-2xl flex-shrink-0 relative">
                 {coverPhoto && (
                   <ImageWithFallback
                     src={coverPhoto.url}
@@ -78,15 +78,15 @@ export const OrbitView = () => {
                 )}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
               </div>
-              <div className="flex flex-col gap-3 flex-1 max-w-lg">
-                <h3 className="text-3xl md:text-4xl font-black tracking-tighter lowercase truncate">
+              <div className="flex flex-col gap-2 md:gap-3 w-full items-center md:items-center">
+                <h3 className="text-xl md:text-2xl lg:text-3xl font-black tracking-tighter lowercase text-center md:text-center truncate w-full">
                   {album.title}
                 </h3>
                 <p className="text-[10px] opacity-40 uppercase tracking-widest">
                   {album.photos.length} {album.photos.length === 1 ? 'photo' : 'photos'}
                 </p>
                 {album.description && (
-                  <p className="text-base opacity-60 line-clamp-3">
+                  <p className="hidden md:block text-sm lg:text-base opacity-60 line-clamp-2 lg:line-clamp-3">
                     {album.description}
                   </p>
                 )}
@@ -115,7 +115,7 @@ export const OrbitView = () => {
           className="text-[10px] font-black tracking-[0.4em] uppercase opacity-80 hover:opacity-100 hover:scale-105 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-black/20 px-2 py-1"
           aria-label="Return to home"
         >
-          WILDLIFE
+          
         </button>
       </div>
     </div>

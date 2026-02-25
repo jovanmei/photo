@@ -29,3 +29,13 @@
     font-size: 0.875rem !important;
   }
 }
+
+/* Hide scrollbar for thumbnail row */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
