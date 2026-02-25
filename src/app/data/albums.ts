@@ -18,7 +18,7 @@ export interface Album {
 
 const STORAGE_KEY = 'photoGallery_albums';
 const STORAGE_VERSION_KEY = 'photoGallery_version';
-const CURRENT_VERSION = '5'; // Increment when data structure changes
+const CURRENT_VERSION = '6'; // Increment when data structure changes
 
 export const initialAlbums: Album[] = [
   {
@@ -32,12 +32,6 @@ export const initialAlbums: Album[] = [
         id: "r30tmhbnz",
         url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771947196/photo-gallery/zms9o7p8t/IMG_4667_hoqgbr.jpg",
         name: "IMG_4667",
-        uploadDate: new Date("2026-02-24")
-      },
-      {
-        id: "0qdf4xdjy",
-        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771947194/photo-gallery/zms9o7p8t/IMG_4832_dozpio.jpg",
-        name: "IMG_4832",
         uploadDate: new Date("2026-02-24")
       },
       {
@@ -68,12 +62,6 @@ export const initialAlbums: Album[] = [
         id: "t34xt6ob9",
         url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771947204/photo-gallery/zms9o7p8t/IMG_3777_jpkoat.jpg",
         name: "IMG_3777",
-        uploadDate: new Date("2026-02-24")
-      },
-      {
-        id: "qawsvosxi",
-        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771947207/photo-gallery/zms9o7p8t/IMG_3667_s1ajkz.jpg",
-        name: "IMG_3667",
         uploadDate: new Date("2026-02-24")
       },
       {
@@ -169,6 +157,18 @@ export const initialAlbums: Album[] = [
         uploadDate: new Date("2026-02-23")
       },
       {
+        id: "zj04k33rr",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772035245/photo-gallery/5r9k8nfz5/vangogh1_r6vo0m.jpg",
+        name: "vangogh1",
+        uploadDate: new Date("2026-02-25")
+      },
+      {
+        id: "0h59hrx5p",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772035078/photo-gallery/5r9k8nfz5/red_light_irlaq3.jpg",
+        name: "red light",
+        uploadDate: new Date("2026-02-25")
+      },
+      {
         id: "j6bf7kr8y",
         url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771836728/photo-gallery/zms9o7p8t/book_and_lake_sotziz.jpg",
         name: "book and lake",
@@ -231,6 +231,12 @@ export const initialAlbums: Album[] = [
         url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771846466/photo-gallery/1/P1160775_spfrti.jpg",
         name: "P1160775",
         uploadDate: new Date("2026-02-23")
+      },
+      {
+        id: "6urd11725",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772035252/photo-gallery/1/dear1_upc5qq.jpg",
+        name: "dear1",
+        uploadDate: new Date("2026-02-25")
       }
     ]
   },
@@ -268,6 +274,14 @@ export const initialAlbums: Album[] = [
         url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771947535/photo-gallery/vpilj9fcm/IMG_4357_kwqynx.jpg",
         name: "IMG_4357",
         uploadDate: new Date("2026-02-24")
+      },
+      {
+        id: "3f3ylo3dc",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771836587/photo-gallery/2/copen_sihtxc.jpg",
+        name: "copen",
+        description: "Along the bright facades of Nyhavn in Copenhagen, the houses stand like painted memories, while laughter and clinking glasses turn the harbor into a living canvas. Between the stillness of color and the warmth of shared meals, the moment feels like a quiet agreement between architecture and appetite—proof that beauty is best tasted slowly.",
+        location: "Copenhagen, Denmark",
+        uploadDate: new Date("2026-02-23")
       }
     ]
   },
@@ -293,14 +307,6 @@ export const initialAlbums: Album[] = [
         uploadDate: new Date("2026-02-23")
       },
       {
-        id: "3f3ylo3dc",
-        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771836587/photo-gallery/2/copen_sihtxc.jpg",
-        name: "copen",
-        description: "Along the bright facades of Nyhavn in Copenhagen, the houses stand like painted memories, while laughter and clinking glasses turn the harbor into a living canvas. Between the stillness of color and the warmth of shared meals, the moment feels like a quiet agreement between architecture and appetite—proof that beauty is best tasted slowly.",
-        location: "Copenhagen, Denmark",
-        uploadDate: new Date("2026-02-23")
-      },
-      {
         id: "xwsvqoyoz",
         url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771836598/photo-gallery/2/maroon5_us9rd6.jpg",
         name: "maroon5",
@@ -323,6 +329,7 @@ export const initialAlbums: Album[] = [
     ]
   }
 ];
+
 
 
 
