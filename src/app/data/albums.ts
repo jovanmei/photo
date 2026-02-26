@@ -18,7 +18,7 @@ export interface Album {
 
 const STORAGE_KEY = 'photoGallery_albums';
 const STORAGE_VERSION_KEY = 'photoGallery_version';
-const CURRENT_VERSION = '6'; // Increment when data structure changes
+const CURRENT_VERSION = '7'; // Increment when data structure changes
 
 export const initialAlbums: Album[] = [
   {
