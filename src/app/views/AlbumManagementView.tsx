@@ -12,7 +12,7 @@ import { CollapsibleSection } from "../components/CollapsibleSection";
 import { Navbar } from "../components/Navbar";
 import { isCloudinaryConfigured, UploadResult } from "../utils/cloudinary";
 import { toast } from "sonner";
-import { Upload, Edit2, GripVertical, Save, X, Download, FileUp, Move, FolderOpen, Cloud, FileCode } from "lucide-react";
+import { Upload, Edit2, GripVertical, Save, X, Download, FileUp, Move, FolderOpen, Cloud, FileCode, Check, CheckSquare, Square, Loader2 } from "lucide-react";
 
 interface DragState {
   draggedPhotoId: string | null;
@@ -21,7 +21,11 @@ interface DragState {
   draggedOverAlbumId: string | null;
 }
 
-// 优化：提取PhotoItem组件，使用React.memo避免不必要的重渲染
+interface SelectedPhoto {
+  photo: Photo;
+  fromAlbumId: string;
+}
+
 const PhotoItem = React.memo(({ 
   photo, 
   albumId, 
@@ -36,7 +40,8 @@ const PhotoItem = React.memo(({
   onDragEnd,
   onClick,
   onEdit,
-  onDelete
+  onDelete,
+  onToggleSelect
 }: { 
   photo: Photo;
   albumId: string;
@@ -52,9 +57,8 @@ const PhotoItem = React.memo(({
   onClick: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onToggleSelect: () => void;
 }) => {
-  const [isLoaded, setIsLoaded] = React.useState(false);
-  
   return (
     <div 
       className={`relative aspect-square group will-change-transform ${
@@ -64,37 +68,44 @@ const PhotoItem = React.memo(({
       } ${
         isDragged ? 'opacity-50' : ''
       } ${
-        isSelected ? 'ring-2 ring-yellow-500' : ''
+        isSelected ? 'ring-2 ring-yellow-500 bg-yellow-500/20' : ''
       }`}
       draggable={isReordering}
       onDragStart={() => onDragStart(photo.id, albumId)}
       onDragOver={(e) => onDragOver(e, photo.id)}
       onDrop={() => onDrop(albumId, photo.id)}
       onDragEnd={onDragEnd}
-      onClick={onClick}
     >
       <ImageWithFallback
         src={photo.url}
         alt={photo.name}
         className="w-full h-full object-cover"
         maxRetries={1}
-        onLoad={() => setIsLoaded(true)}
       />
+      
+      {isMovingMode && (
+        <div 
+          className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors cursor-pointer flex items-start justify-start p-1"
+          onClick={onToggleSelect}
+        >
+          <div className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
+            isSelected ? 'bg-yellow-500' : 'bg-white/80 group-hover:bg-white'
+          }`}>
+            {isSelected ? (
+              <CheckSquare size={16} className="text-white" />
+            ) : (
+              <Square size={16} className="text-gray-600" />
+            )}
+          </div>
+        </div>
+      )}
+      
       {isReordering && (
         <div className="absolute inset-0 bg-black/30 flex items-center justify-center pointer-events-none">
           <GripVertical size={24} className="text-white" />
         </div>
       )}
-      {isMovingMode && !isSelected && (
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center pointer-events-none">
-          <span className="text-white text-[10px] font-black opacity-0 group-hover:opacity-100">SELECT</span>
-        </div>
-      )}
-      {isSelected && (
-        <div className="absolute inset-0 bg-yellow-500/50 flex items-center justify-center pointer-events-none">
-          <span className="text-white text-[10px] font-black">SELECTED</span>
-        </div>
-      )}
+      
       {!isReordering && !isMovingMode && (
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
           <div className="flex gap-2">
@@ -119,12 +130,11 @@ const PhotoItem = React.memo(({
 
 PhotoItem.displayName = 'PhotoItem';
 
-// 优化：提取AlbumCard组件
 const AlbumCard = React.memo(({
   album,
   isReorderingAlbums,
   isMovingPhotoMode,
-  selectedPhotoFromAlbumId,
+  selectedPhotos,
   dragState,
   editingAlbumId,
   reorderingPhotoAlbumId,
@@ -136,12 +146,11 @@ const AlbumCard = React.memo(({
   onAlbumDragOver,
   onAlbumDrop,
   onAlbumDragEnd,
-  onMovePhotoToAlbum,
   onPhotoDragStart,
   onPhotoDragOver,
   onPhotoDrop,
   onPhotoDragEnd,
-  onSelectPhotoToMove,
+  onTogglePhotoSelect,
   onNavigateToPhoto,
   onEditPhoto,
   onDeletePhoto,
@@ -157,7 +166,7 @@ const AlbumCard = React.memo(({
   album: Album;
   isReorderingAlbums: boolean;
   isMovingPhotoMode: boolean;
-  selectedPhotoFromAlbumId: string | null;
+  selectedPhotos: SelectedPhoto[];
   dragState: DragState;
   editingAlbumId: string | null;
   reorderingPhotoAlbumId: string | null;
@@ -169,12 +178,11 @@ const AlbumCard = React.memo(({
   onAlbumDragOver: (e: React.DragEvent, albumId: string) => void;
   onAlbumDrop: (albumId: string) => void;
   onAlbumDragEnd: () => void;
-  onMovePhotoToAlbum: (albumId: string) => void;
   onPhotoDragStart: (photoId: string, albumId: string) => void;
   onPhotoDragOver: (e: React.DragEvent, photoId: string) => void;
   onPhotoDrop: (albumId: string, photoId: string) => void;
   onPhotoDragEnd: () => void;
-  onSelectPhotoToMove: (photo: Photo, albumId: string) => void;
+  onTogglePhotoSelect: (photo: Photo, albumId: string) => void;
   onNavigateToPhoto: (photo: Photo) => void;
   onEditPhoto: (albumId: string, photo: Photo) => void;
   onDeletePhoto: (albumId: string, photoId: string) => void;
@@ -191,7 +199,7 @@ const AlbumCard = React.memo(({
   const isReorderingPhotos = reorderingPhotoAlbumId === album.id;
   const isDraggedOver = dragState.draggedOverAlbumId === album.id;
   const isDragged = dragState.draggedPhotoAlbumId === album.id;
-  const isSelectedSource = selectedPhotoFromAlbumId === album.id;
+  const selectedCount = selectedPhotos.filter(s => s.fromAlbumId === album.id).length;
 
   return (
     <motion.div
@@ -204,8 +212,6 @@ const AlbumCard = React.memo(({
         isDraggedOver ? 'ring-2 ring-blue-500 border-blue-500' : 'border-black'
       } ${
         isDragged ? 'opacity-50' : ''
-      } ${
-        isSelectedSource ? 'ring-2 ring-yellow-500' : ''
       }`}
       draggable={isReorderingAlbums}
       onDragStart={() => onAlbumDragStart(album.id)}
@@ -213,7 +219,6 @@ const AlbumCard = React.memo(({
       onDrop={() => onAlbumDrop(album.id)}
       onDragEnd={onAlbumDragEnd}
     >
-      {/* Album Header */}
       <div className="p-4 md:p-6 border-b-2 border-black">
         {isEditing ? (
           <div className="space-y-4">
@@ -268,6 +273,11 @@ const AlbumCard = React.memo(({
                   <GripVertical size={20} className="text-gray-400 flex-shrink-0" />
                 )}
                 <h3 className="text-xl md:text-2xl font-black tracking-tighter">{album.title}</h3>
+                {isMovingPhotoMode && selectedCount > 0 && (
+                  <span className="text-[10px] bg-yellow-500 text-white px-2 py-1 rounded font-bold">
+                    {selectedCount} selected
+                  </span>
+                )}
               </div>
               <p className="text-[13px] opacity-60 mb-4">{album.description}</p>
               <div className="flex flex-wrap items-center gap-4 md:gap-6 text-[10px] opacity-40 uppercase tracking-[0.2em]">
@@ -304,21 +314,11 @@ const AlbumCard = React.memo(({
                   </button>
                 </>
               )}
-              {isMovingPhotoMode && selectedPhotoFromAlbumId !== album.id && (
-                <button
-                  onClick={() => onMovePhotoToAlbum(album.id)}
-                  className="text-[10px] font-black tracking-[0.2em] uppercase bg-blue-500 text-white px-3 md:px-4 py-2 hover:bg-blue-600 transition-colors flex items-center gap-2 min-h-[44px]"
-                >
-                  <FolderOpen size={14} />
-                  MOVE HERE
-                </button>
-              )}
             </div>
           </div>
         )}
       </div>
 
-      {/* Album Photos */}
       {album.photos.length > 0 && !isReorderingAlbums && (
         <div className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
@@ -337,31 +337,33 @@ const AlbumCard = React.memo(({
             )}
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-            {album.photos.map((photo) => (
-              <PhotoItem
-                key={photo.id}
-                photo={photo}
-                albumId={album.id}
-                isReordering={isReorderingPhotos}
-                isMovingMode={isMovingPhotoMode}
-                isSelected={isSelectedSource && false}
-                isDraggedOver={dragState.draggedOverPhotoId === photo.id}
-                isDragged={dragState.draggedPhotoId === photo.id}
-                onDragStart={onPhotoDragStart}
-                onDragOver={onPhotoDragOver}
-                onDrop={onPhotoDrop}
-                onDragEnd={onPhotoDragEnd}
-                onClick={() => {
-                  if (isMovingPhotoMode && !isReorderingPhotos) {
-                    onSelectPhotoToMove(photo, album.id);
-                  } else if (!isMovingPhotoMode && !isReorderingPhotos) {
-                    onNavigateToPhoto(photo);
-                  }
-                }}
-                onEdit={() => onEditPhoto(album.id, photo)}
-                onDelete={() => onDeletePhoto(album.id, photo.id)}
-              />
-            ))}
+            {album.photos.map((photo) => {
+              const isSelected = selectedPhotos.some(s => s.photo.id === photo.id);
+              return (
+                <PhotoItem
+                  key={photo.id}
+                  photo={photo}
+                  albumId={album.id}
+                  isReordering={isReorderingPhotos}
+                  isMovingMode={isMovingPhotoMode}
+                  isSelected={isSelected}
+                  isDraggedOver={dragState.draggedOverPhotoId === photo.id}
+                  isDragged={dragState.draggedPhotoId === photo.id}
+                  onDragStart={onPhotoDragStart}
+                  onDragOver={onPhotoDragOver}
+                  onDrop={onPhotoDrop}
+                  onDragEnd={onPhotoDragEnd}
+                  onClick={() => {
+                    if (!isMovingPhotoMode && !isReorderingPhotos) {
+                      onNavigateToPhoto(photo);
+                    }
+                  }}
+                  onEdit={() => onEditPhoto(album.id, photo)}
+                  onDelete={() => onDeletePhoto(album.id, photo.id)}
+                  onToggleSelect={() => onTogglePhotoSelect(photo, album.id)}
+                />
+              );
+            })}
           </div>
         </div>
       )}
@@ -391,7 +393,11 @@ export const AlbumManagementView = () => {
   const [reorderingAlbumId, setReorderingAlbumId] = React.useState<string | null>(null);
   const [reorderingAlbumsMode, setReorderingAlbumsMode] = React.useState(false);
   const [movingPhotoMode, setMovingPhotoMode] = React.useState(false);
-  const [selectedPhotoToMove, setSelectedPhotoToMove] = React.useState<{ photo: Photo; fromAlbumId: string } | null>(null);
+  const [selectedPhotos, setSelectedPhotos] = React.useState<SelectedPhoto[]>([]);
+  const [showMoveConfirmModal, setShowMoveConfirmModal] = React.useState(false);
+  const [targetAlbumId, setTargetAlbumId] = React.useState<string | null>(null);
+  const [isMoving, setIsMoving] = React.useState(false);
+  const [moveProgress, setMoveProgress] = React.useState(0);
   const [dragState, setDragState] = React.useState<DragState>({
     draggedPhotoId: null,
     draggedOverPhotoId: null,
@@ -400,7 +406,6 @@ export const AlbumManagementView = () => {
   });
   const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
 
-  // 优化：使用useMemo缓存验证函数结果
   const validateForm = React.useCallback((title: string, description: string) => {
     const newErrors: { title?: string; description?: string } = {};
     if (!title.trim()) {
@@ -568,33 +573,101 @@ export const AlbumManagementView = () => {
   const toggleAlbumsReorderMode = React.useCallback(() => {
     setReorderingAlbumsMode(prev => !prev);
     setMovingPhotoMode(false);
+    setSelectedPhotos([]);
     setDragState({ draggedPhotoId: null, draggedOverPhotoId: null, draggedPhotoAlbumId: null, draggedOverAlbumId: null });
   }, []);
 
   const toggleMovingPhotoMode = React.useCallback(() => {
     setMovingPhotoMode(prev => !prev);
     setReorderingAlbumsMode(false);
-    setSelectedPhotoToMove(null);
+    setSelectedPhotos([]);
   }, []);
 
-  const selectPhotoToMove = React.useCallback((photo: Photo, fromAlbumId: string) => {
-    setSelectedPhotoToMove({ photo, fromAlbumId });
+  const togglePhotoSelect = React.useCallback((photo: Photo, albumId: string) => {
+    setSelectedPhotos(prev => {
+      const exists = prev.find(s => s.photo.id === photo.id);
+      if (exists) {
+        return prev.filter(s => s.photo.id !== photo.id);
+      }
+      return [...prev, { photo, fromAlbumId: albumId }];
+    });
   }, []);
 
-  const movePhotoToTargetAlbum = React.useCallback((toAlbumId: string) => {
-    if (!selectedPhotoToMove) return;
-    if (selectedPhotoToMove.fromAlbumId === toAlbumId) {
-      toast.error("Cannot move photo to the same album");
+  const selectAllPhotosInAlbum = React.useCallback((albumId: string) => {
+    const album = albums.find(a => a.id === albumId);
+    if (!album) return;
+    
+    setSelectedPhotos(prev => {
+      const otherAlbumPhotos = prev.filter(s => s.fromAlbumId !== albumId);
+      const allSelected = prev.filter(s => s.fromAlbumId === albumId).length === album.photos.length;
+      
+      if (allSelected) {
+        return otherAlbumPhotos;
+      }
+      
+      return [...otherAlbumPhotos, ...album.photos.map(photo => ({ photo, fromAlbumId: albumId }))];
+    });
+  }, [albums]);
+
+  const openMoveConfirmModal = React.useCallback((toAlbumId: string) => {
+    setTargetAlbumId(toAlbumId);
+    setShowMoveConfirmModal(true);
+  }, []);
+
+  const executeBulkMove = React.useCallback(async () => {
+    if (!targetAlbumId || selectedPhotos.length === 0) return;
+
+    const targetAlbum = albums.find(a => a.id === targetAlbumId);
+    if (!targetAlbum) {
+      toast.error("Target album not found");
       return;
     }
 
-    if (confirm(`Move "${selectedPhotoToMove.photo.name}" to this album?`)) {
-      movePhotoToAlbum(selectedPhotoToMove.photo.id, selectedPhotoToMove.fromAlbumId, toAlbumId);
-      toast.success("Photo moved successfully!");
-      setSelectedPhotoToMove(null);
-      setMovingPhotoMode(false);
+    setIsMoving(true);
+    setMoveProgress(0);
+    
+    const totalPhotos = selectedPhotos.length;
+    let successCount = 0;
+    let failCount = 0;
+    const errors: string[] = [];
+
+    for (let i = 0; i < selectedPhotos.length; i++) {
+      const { photo, fromAlbumId } = selectedPhotos[i];
+      
+      try {
+        if (fromAlbumId === targetAlbumId) {
+          errors.push(`"${photo.name}" is already in the target album`);
+          failCount++;
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 50));
+          movePhotoToAlbum(photo.id, fromAlbumId, targetAlbumId);
+          successCount++;
+        }
+      } catch (error) {
+        errors.push(`Failed to move "${photo.name}"`);
+        failCount++;
+      }
+      
+      setMoveProgress(Math.round(((i + 1) / totalPhotos) * 100));
     }
-  }, [selectedPhotoToMove, movePhotoToAlbum]);
+
+    setIsMoving(false);
+    setShowMoveConfirmModal(false);
+    setSelectedPhotos([]);
+    setMovingPhotoMode(false);
+    setTargetAlbumId(null);
+
+    if (successCount > 0) {
+      toast.success(`Successfully moved ${successCount} photo(s) to "${targetAlbum.title}"`);
+    }
+    
+    if (failCount > 0) {
+      toast.error(`Failed to move ${failCount} photo(s)`);
+      if (errors.length > 0) {
+        console.error("Move errors:", errors);
+      }
+    }
+  }, [targetAlbumId, selectedPhotos, albums, movePhotoToAlbum]);
 
   const handleDragStart = React.useCallback((photoId: string, albumId: string) => {
     setDragState(prev => ({ 
@@ -725,6 +798,8 @@ export const AlbumManagementView = () => {
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  const targetAlbum = targetAlbumId ? albums.find(a => a.id === targetAlbumId) : null;
+
   return (
     <div className="min-h-screen bg-[#F2F2F2] text-black font-sans flex flex-col p-4 md:p-8 lg:p-12">
       <Navbar showAlbumsLink />
@@ -798,15 +873,25 @@ export const AlbumManagementView = () => {
           {movingPhotoMode && (
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200">
               <p className="text-[11px] text-blue-800">
-                <strong>Mode:</strong> Move photos between albums
-                {selectedPhotoToMove ? (
-                  <span className="block mt-1">
-                    Selected: "{selectedPhotoToMove.photo.name}"
-                  </span>
-                ) : (
-                  <span className="block mt-1">Click on a photo to select it</span>
-                )}
+                <strong>Mode:</strong> Select multiple photos to move between albums
               </p>
+              <p className="text-[11px] text-blue-800 mt-1">
+                Selected: <strong>{selectedPhotos.length}</strong> photo(s)
+              </p>
+              {selectedPhotos.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.1em]">Move to:</span>
+                  {albums.map(album => (
+                    <button
+                      key={album.id}
+                      onClick={() => openMoveConfirmModal(album.id)}
+                      className="text-[10px] font-black tracking-[0.1em] uppercase bg-blue-500 text-white px-3 py-1 hover:bg-blue-600 transition-colors"
+                    >
+                      {album.title}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
           
@@ -920,7 +1005,7 @@ export const AlbumManagementView = () => {
               album={album}
               isReorderingAlbums={reorderingAlbumsMode}
               isMovingPhotoMode={movingPhotoMode}
-              selectedPhotoFromAlbumId={selectedPhotoToMove?.fromAlbumId || null}
+              selectedPhotos={selectedPhotos}
               dragState={dragState}
               editingAlbumId={editingAlbum?.id || null}
               reorderingPhotoAlbumId={reorderingAlbumId}
@@ -930,20 +1015,13 @@ export const AlbumManagementView = () => {
               onToggleReorderPhotos={toggleReorderMode}
               onAlbumDragStart={handleAlbumDragStart}
               onAlbumDragOver={handleAlbumDragOver}
-              onAlbumDrop={(albumId) => {
-                if (reorderingAlbumsMode) {
-                  handleAlbumDrop(albumId);
-                } else if (movingPhotoMode && selectedPhotoToMove) {
-                  movePhotoToTargetAlbum(albumId);
-                }
-              }}
+              onAlbumDrop={handleAlbumDrop}
               onAlbumDragEnd={handleDragEnd}
-              onMovePhotoToAlbum={movePhotoToTargetAlbum}
               onPhotoDragStart={handleDragStart}
               onPhotoDragOver={handleDragOver}
               onPhotoDrop={handleDrop}
               onPhotoDragEnd={handleDragEnd}
-              onSelectPhotoToMove={selectPhotoToMove}
+              onTogglePhotoSelect={togglePhotoSelect}
               onNavigateToPhoto={navigateToPhoto}
               onEditPhoto={startEditPhoto}
               onDeletePhoto={handleDeletePhoto}
@@ -1110,6 +1188,65 @@ export const AlbumManagementView = () => {
                   [ NO ]
                 </button>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showMoveConfirmModal && targetAlbum && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white border-2 border-black p-6 md:p-8 max-w-md w-full"
+            >
+              <h2 className="text-lg md:text-xl font-black tracking-tighter mb-4">Confirm Move</h2>
+              
+              <div className="mb-6">
+                <p className="text-[13px] mb-2">
+                  Move <strong>{selectedPhotos.length}</strong> photo(s) to:
+                </p>
+                <p className="text-[13px] font-bold text-blue-600">
+                  "{targetAlbum.title}"
+                </p>
+              </div>
+
+              {isMoving ? (
+                <div className="mb-6">
+                  <div className="flex items-center justify-center gap-3 mb-3">
+                    <Loader2 size={20} className="animate-spin" />
+                    <span className="text-[13px]">Moving photos...</span>
+                  </div>
+                  <div className="w-full bg-gray-200 h-2">
+                    <div 
+                      className="bg-blue-500 h-2 transition-all duration-300"
+                      style={{ width: `${moveProgress}%` }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-center mt-2 opacity-60">{moveProgress}%</p>
+                </div>
+              ) : (
+                <div className="flex gap-4">
+                  <button
+                    onClick={executeBulkMove}
+                    className="text-[10px] font-black tracking-[0.3em] uppercase bg-blue-500 text-white px-6 py-3 hover:bg-blue-600 transition-colors flex-1 min-h-[44px]"
+                  >
+                    [ MOVE ]
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowMoveConfirmModal(false);
+                      setTargetAlbumId(null);
+                    }}
+                    className="text-[10px] font-black tracking-[0.3em] uppercase border-2 border-black px-6 py-3 hover:bg-black hover:text-white transition-colors flex-1 min-h-[44px]"
+                  >
+                    [ CANCEL ]
+                  </button>
+                </div>
+              )}
             </motion.div>
           </div>
         )}

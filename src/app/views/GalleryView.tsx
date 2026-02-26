@@ -161,37 +161,39 @@ export const GalleryView = () => {
 
       {/* Thumbnail Row */}
       {currentAlbum.photos.length > 0 && (
-        <div 
-          ref={thumbnailRowRef}
-          className="w-full flex justify-start gap-[2px] mt-10 md:mt-1 mb-8 overflow-x-auto scrollbar-hide scroll-smooth px-2"
-          style={{ 
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch'
-          }}
-        >
-          {currentAlbum.photos.map((photo, i) => (
-            <motion.div 
-              key={photo.id}
-              ref={(el) => { thumbnailRefs.current[i] = el; }}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.05 }}
-              onClick={() => handleThumbnailClick(i)}
-              className={`flex-shrink-0 w-[25%] md:w-[13%] aspect-square bg-neutral-200 overflow-hidden cursor-pointer transition-all ${i === currentPhotoIndex ? 'ring-2 ring-black ring-offset-2' : 'opacity-70 hover:opacity-100'}`}
-            >
-              <ImageWithFallback 
-                src={photo.url} 
-                alt={photo.name}
-                className="w-full h-full object-cover transition-all"
-              />
-            </motion.div>
-          ))}
+        <div className="w-full flex justify-center mt-10 md:mt-1 mb-8">
+          <div 
+            ref={thumbnailRowRef}
+            className="flex justify-start gap-[2px] mt-10 md:mt-1 mb-8 overflow-x-auto scrollbar-hide scroll-smooth px-2"
+            style={{ 
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch'
+            }}
+          >
+            {currentAlbum.photos.map((photo, i) => (
+              <motion.div 
+                key={photo.id}
+                ref={(el) => { thumbnailRefs.current[i] = el; }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.05 }}
+                onClick={() => handleThumbnailClick(i)}
+                className={`flex-shrink-0 w-[25%] md:w-[13%] aspect-square bg-neutral-200 overflow-hidden cursor-pointer transition-all ${i === currentPhotoIndex ? 'ring-2 ring-black ring-offset-2' : 'opacity-70 hover:opacity-100'}`}
+              >
+                <ImageWithFallback 
+                  src={photo.url} 
+                  alt={photo.name}
+                  className="w-full h-full object-cover transition-all"
+                />
+              </motion.div>
+            ))}
+          </div>
         </div>
       )}
 
       {/* Main Content Container */}
-      <div className="flex-1 flex flex-col items-center justify-center -mt-15 md:mt-4">
+      <div className="flex-1 flex flex-col items-center justify-center -mt-25 md:mt-4">
         <div className="flex items-center justify-center gap-2 md:gap-8 lg:gap-16 w-full">
           <button 
             onClick={handlePrevPhoto}

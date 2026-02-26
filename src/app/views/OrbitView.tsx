@@ -79,7 +79,7 @@ export const OrbitView = () => {
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
               </div>
               <div className="flex flex-col gap-2 md:gap-3 w-full items-center md:items-center">
-                <h3 className="text-xl md:text-2xl lg:text-3xl font-black tracking-tighter lowercase text-center md:text-center truncate w-full">
+                <h3 className="text-xl md:text-3xl lg:text-4xl font-black tracking-tighter lowercase text-center md:text-center truncate w-full">
                   {album.title}
                 </h3>
                 <p className="text-[10px] opacity-40 uppercase tracking-widest">
