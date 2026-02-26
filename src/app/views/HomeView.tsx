@@ -40,7 +40,7 @@ export const HomeView = () => {
         {/* Right Text Column */}
         <div className="w-full md:col-span-5 md:col-start-8 lg:col-span-4 lg:col-start-9 flex flex-col gap-4 z-10 mt-4 md:mt-0 order-2">
           <div className="flex gap-4 items-start">
-            <p className="text-sm md:text-[13px] leading-relaxed max-w-sm">
+            <p className="text-sm md:text-[14px] leading-relaxed max-w-sm">
               I'm not great with words. That's why I take photos. Every image here has a story. Someone I met, a place I walked through, a moment I didn't expect but couldn't let pass. This is more than a portfolio. It's what I want to remember, and maybe, what you'll feel something from too.
             </p>
           </div>
