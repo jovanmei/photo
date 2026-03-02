@@ -12,7 +12,7 @@ import { CollapsibleSection } from "../components/CollapsibleSection";
 import { Navbar } from "../components/Navbar";
 import { isCloudinaryConfigured, UploadResult } from "../utils/cloudinary";
 import { toast } from "sonner";
-import { Upload, Edit2, GripVertical, Save, X, Download, FileUp, Move, FolderOpen, Cloud, FileCode, Check, CheckSquare, Square, Loader2 } from "lucide-react";
+import { Upload, Edit2, GripVertical, Save, X, Download, FileUp, Move, FolderOpen, Cloud, FileCode, Check, CheckSquare, Square, Loader2, Link2, AlertCircle } from "lucide-react";
 
 interface DragState {
   draggedPhotoId: string | null;
@@ -25,6 +25,282 @@ interface SelectedPhoto {
   photo: Photo;
   fromAlbumId: string;
 }
+
+type UploadMethod = 'cloudinary' | 'url';
+
+interface UploadModalProps {
+  albumId: string;
+  onClose: () => void;
+  onUploadComplete: (results: UploadResult[]) => void;
+  onUploadError: (error: Error) => void;
+  addPhotosToAlbum: (albumId: string, photos: Photo[]) => void;
+}
+
+const UploadModal: React.FC<UploadModalProps> = ({
+  albumId,
+  onClose,
+  onUploadComplete,
+  onUploadError,
+  addPhotosToAlbum
+}) => {
+  const [uploadMethod, setUploadMethod] = React.useState<UploadMethod>('cloudinary');
+  const [imageUrl, setImageUrl] = React.useState('');
+  const [imageName, setImageName] = React.useState('');
+  const [urlError, setUrlError] = React.useState<string | null>(null);
+  const [isAdding, setIsAdding] = React.useState(false);
+  const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+
+  const validateUrl = (url: string): { valid: boolean; error?: string } => {
+    if (!url.trim()) {
+      return { valid: false, error: 'URL is required' };
+    }
+
+    try {
+      const parsedUrl = new URL(url);
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        return { valid: false, error: 'URL must start with http:// or https://' };
+      }
+      if (!parsedUrl.hostname.includes('.')) {
+        return { valid: false, error: 'Invalid URL domain' };
+      }
+    } catch {
+      return { valid: false, error: 'Invalid URL format' };
+    }
+
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+    const hasImageExtension = imageExtensions.some(ext => 
+      url.toLowerCase().includes(ext)
+    );
+    
+    const imagePatterns = [
+      /\/image\//i,
+      /\/img\//i,
+      /\/photo\//i,
+      /\/pictures?\//i,
+      /cloudinary/i,
+      /qiniu/i,
+      /aliyun/i,
+      /amazonaws\.com/i,
+      /googleusercontent/i,
+      /githubusercontent/i
+    ];
+    
+    const isLikelyImage = hasImageExtension || imagePatterns.some(pattern => pattern.test(url));
+    
+    if (!isLikelyImage) {
+      return { valid: false, error: 'URL does not appear to be an image. Supported formats: jpg, png, gif, webp' };
+    }
+
+    return { valid: true };
+  };
+
+  const handleUrlChange = (url: string) => {
+    setImageUrl(url);
+    setUrlError(null);
+    
+    if (url.trim()) {
+      const validation = validateUrl(url);
+      if (validation.valid) {
+        setPreviewUrl(url);
+      } else {
+        setPreviewUrl(null);
+      }
+    } else {
+      setPreviewUrl(null);
+    }
+  };
+
+  const handleAddFromUrl = async () => {
+    const validation = validateUrl(imageUrl);
+    if (!validation.valid) {
+      setUrlError(validation.error || 'Invalid URL');
+      return;
+    }
+
+    setIsAdding(true);
+
+    try {
+      const newPhoto: Photo = {
+        id: generateId(),
+        url: imageUrl.trim(),
+        name: imageName.trim() || `Photo ${Date.now()}`,
+        uploadDate: new Date(),
+      };
+
+      addPhotosToAlbum(albumId, [newPhoto]);
+      toast.success('Photo added successfully!');
+      setImageUrl('');
+      setImageName('');
+      setPreviewUrl(null);
+      onClose();
+    } catch (error) {
+      setUrlError('Failed to add photo. Please try again.');
+      console.error('Add photo error:', error);
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const handlePaste = async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+    
+    for (const item of items) {
+      if (item.type === 'text/plain') {
+        const text = await new Promise<string>(resolve => {
+          item.getAsString(resolve);
+        });
+        
+        if (text.startsWith('http')) {
+          setImageUrl(text);
+          handleUrlChange(text);
+        }
+      }
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        transition={{ duration: 0.2 }}
+        className="bg-[#F2F2F2] border-2 border-black w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+      >
+        <div className="p-4 md:p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl md:text-2xl font-black tracking-tighter">Add Photos</h2>
+            <button
+              onClick={onClose}
+              className="text-2xl font-black hover:opacity-50 transition-opacity min-h-[44px] min-w-[44px] flex items-center justify-center"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="flex gap-2 mb-6">
+            <button
+              onClick={() => setUploadMethod('cloudinary')}
+              className={`flex-1 text-[10px] font-black tracking-[0.2em] uppercase py-3 border-2 transition-colors min-h-[44px] flex items-center justify-center gap-2 ${
+                uploadMethod === 'cloudinary'
+                  ? 'bg-black text-white border-black'
+                  : 'border-black hover:bg-black hover:text-white'
+              }`}
+            >
+              <Upload size={14} />
+              Upload
+            </button>
+            <button
+              onClick={() => setUploadMethod('url')}
+              className={`flex-1 text-[10px] font-black tracking-[0.2em] uppercase py-3 border-2 transition-colors min-h-[44px] flex items-center justify-center gap-2 ${
+                uploadMethod === 'url'
+                  ? 'bg-black text-white border-black'
+                  : 'border-black hover:bg-black hover:text-white'
+              }`}
+            >
+              <Link2 size={14} />
+              From URL
+            </button>
+          </div>
+
+          {uploadMethod === 'cloudinary' ? (
+            <CloudinaryUpload
+              albumId={albumId}
+              onUploadComplete={onUploadComplete}
+              onUploadError={onUploadError}
+              maxFiles={10}
+            />
+          ) : (
+            <div 
+              className="space-y-4"
+              onPaste={handlePaste}
+            >
+              <div className="p-4 bg-blue-50 border border-blue-200 text-xs text-blue-800">
+                <p className="font-bold mb-1">PicGo / URL Upload</p>
+                <p>Use PicGo to upload images to your preferred image host, then paste the URL here.</p>
+                <p className="mt-1 opacity-70">Tip: You can also paste URLs directly with Ctrl+V</p>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-[0.2em] mb-2">
+                  Image URL *
+                </label>
+                <input
+                  type="text"
+                  value={imageUrl}
+                  onChange={(e) => handleUrlChange(e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  className={`w-full border-2 ${urlError ? 'border-red-500' : 'border-black'} px-4 py-3 text-[13px] focus:outline-none focus:border-black min-h-[44px]`}
+                />
+                {urlError && (
+                  <p className="text-red-500 text-[10px] mt-2 flex items-center gap-1">
+                    <AlertCircle size={12} />
+                    {urlError}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-[0.2em] mb-2">
+                  Photo Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={imageName}
+                  onChange={(e) => setImageName(e.target.value)}
+                  placeholder="Enter a name for this photo"
+                  className="w-full border-2 border-black px-4 py-3 text-[13px] focus:outline-none focus:border-black min-h-[44px]"
+                />
+              </div>
+
+              {previewUrl && (
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] mb-2">
+                    Preview
+                  </label>
+                  <div className="border-2 border-black p-2 bg-white">
+                    <ImageWithFallback
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-full max-h-48 object-contain"
+                      maxRetries={1}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-4 pt-4">
+                <button
+                  onClick={handleAddFromUrl}
+                  disabled={isAdding || !imageUrl.trim()}
+                  className="flex-1 text-[10px] font-black tracking-[0.3em] uppercase bg-black text-white px-6 py-3 hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] flex items-center justify-center gap-2"
+                >
+                  {isAdding ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    <>
+                      <Check size={14} />
+                      Add Photo
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={onClose}
+                  className="text-[10px] font-black tracking-[0.3em] uppercase border-2 border-black px-6 py-3 hover:bg-black hover:text-white transition-colors min-h-[44px]"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 const PhotoItem = React.memo(({ 
   photo, 
@@ -385,6 +661,8 @@ export const AlbumManagementView = () => {
   const [editPhotoName, setEditPhotoName] = React.useState("");
   const [editPhotoDescription, setEditPhotoDescription] = React.useState("");
   const [editPhotoLocation, setEditPhotoLocation] = React.useState("");
+  const [editPhotoUrl, setEditPhotoUrl] = React.useState("");
+  const [urlError, setUrlError] = React.useState<string | null>(null);
   const [showSaveConfirm, setShowSaveConfirm] = React.useState(false);
   const [editingAlbum, setEditingAlbum] = React.useState<Album | null>(null);
   const [editAlbumTitle, setEditAlbumTitle] = React.useState("");
@@ -493,7 +771,53 @@ export const AlbumManagementView = () => {
     setEditPhotoName(photo.name);
     setEditPhotoDescription(photo.description || '');
     setEditPhotoLocation(photo.location || '');
+    setEditPhotoUrl(photo.url);
+    setUrlError(null);
   }, []);
+
+  const validatePhotoUrl = (url: string): { valid: boolean; error?: string } => {
+    if (!url.trim()) {
+      return { valid: false, error: 'URL is required' };
+    }
+
+    try {
+      const parsedUrl = new URL(url);
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        return { valid: false, error: 'URL must start with http:// or https://' };
+      }
+      if (!parsedUrl.hostname.includes('.')) {
+        return { valid: false, error: 'Invalid URL domain' };
+      }
+    } catch {
+      return { valid: false, error: 'Invalid URL format' };
+    }
+
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+    const hasImageExtension = imageExtensions.some(ext => 
+      url.toLowerCase().includes(ext)
+    );
+    
+    const imagePatterns = [
+      /\/image\//i,
+      /\/img\//i,
+      /\/photo\//i,
+      /\/pictures?\//i,
+      /cloudinary/i,
+      /qiniu/i,
+      /aliyun/i,
+      /amazonaws\.com/i,
+      /googleusercontent/i,
+      /githubusercontent/i
+    ];
+    
+    const isLikelyImage = hasImageExtension || imagePatterns.some(pattern => pattern.test(url));
+    
+    if (!isLikelyImage) {
+      return { valid: false, error: 'URL does not appear to be an image' };
+    }
+
+    return { valid: true };
+  };
 
   const saveEditPhoto = React.useCallback(() => {
     if (!editingPhoto) return;
@@ -501,22 +825,39 @@ export const AlbumManagementView = () => {
       toast.error("Photo name is required");
       return;
     }
+    
+    const urlValidation = validatePhotoUrl(editPhotoUrl);
+    if (!urlValidation.valid) {
+      setUrlError(urlValidation.error || 'Invalid URL');
+      toast.error(urlValidation.error || 'Invalid URL');
+      return;
+    }
+    
     setShowSaveConfirm(true);
-  }, [editingPhoto, editPhotoName]);
+  }, [editingPhoto, editPhotoName, editPhotoUrl]);
 
   const confirmSave = React.useCallback(() => {
     if (!editingPhoto || !editPhotoName.trim()) return;
+    
+    const urlValidation = validatePhotoUrl(editPhotoUrl);
+    if (!urlValidation.valid) {
+      setUrlError(urlValidation.error || 'Invalid URL');
+      toast.error(urlValidation.error || 'Invalid URL');
+      return;
+    }
     
     updatePhoto(editingPhoto.albumId, editingPhoto.photo.id, { 
       name: editPhotoName.trim(),
       description: editPhotoDescription.trim(),
       location: editPhotoLocation.trim() || undefined,
+      url: editPhotoUrl.trim(),
     });
     
     toast.success("Photo updated successfully!");
     setEditingPhoto(null);
     setShowSaveConfirm(false);
-  }, [editingPhoto, editPhotoName, editPhotoDescription, editPhotoLocation, updatePhoto]);
+    setUrlError(null);
+  }, [editingPhoto, editPhotoName, editPhotoDescription, editPhotoLocation, editPhotoUrl, updatePhoto]);
 
   const cancelEdit = React.useCallback(() => {
     setEditingPhoto(null);
@@ -1046,34 +1387,13 @@ export const AlbumManagementView = () => {
 
       <AnimatePresence>
         {showUploadModal && uploadingAlbumId && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.2 }}
-              className="bg-[#F2F2F2] border-2 border-black w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-            >
-              <div className="p-4 md:p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl md:text-2xl font-black tracking-tighter">Upload Photos</h2>
-                  <button
-                    onClick={() => setShowUploadModal(false)}
-                    className="text-2xl font-black hover:opacity-50 transition-opacity min-h-[44px] min-w-[44px] flex items-center justify-center"
-                  >
-                    ×
-                  </button>
-                </div>
-                
-                <CloudinaryUpload
-                  albumId={uploadingAlbumId}
-                  onUploadComplete={handleUploadComplete}
-                  onUploadError={handleUploadError}
-                  maxFiles={10}
-                />
-              </div>
-            </motion.div>
-          </div>
+          <UploadModal
+            albumId={uploadingAlbumId}
+            onClose={() => setShowUploadModal(false)}
+            onUploadComplete={handleUploadComplete}
+            onUploadError={handleUploadError}
+            addPhotosToAlbum={addPhotosToAlbum}
+          />
         )}
       </AnimatePresence>
 
@@ -1100,14 +1420,45 @@ export const AlbumManagementView = () => {
                 
                 <div className="mb-6">
                   <ImageWithFallback
-                    src={editingPhoto.photo.url}
-                    alt={editingPhoto.photo.name}
+                    src={editPhotoUrl}
+                    alt={editPhotoName}
                     className="w-full aspect-square object-cover"
                     maxRetries={1}
                   />
                 </div>
                 
                 <div className="space-y-4">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Photo URL *</label>
+                    <input
+                      type="text"
+                      value={editPhotoUrl}
+                      onChange={(e) => {
+                        setEditPhotoUrl(e.target.value);
+                        setUrlError(null);
+                      }}
+                      onBlur={() => {
+                        if (editPhotoUrl.trim()) {
+                          const validation = validatePhotoUrl(editPhotoUrl);
+                          if (!validation.valid) {
+                            setUrlError(validation.error || null);
+                          } else {
+                            setUrlError(null);
+                          }
+                        }
+                      }}
+                      className={`w-full border-2 ${urlError ? 'border-red-500' : 'border-black'} px-4 py-3 text-[13px] focus:outline-none focus:border-black min-h-[44px] font-mono text-xs`}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                    {urlError && (
+                      <p className="text-red-500 text-[10px] mt-2 flex items-center gap-1">
+                        <AlertCircle size={12} />
+                        {urlError}
+                      </p>
+                    )}
+                    <p className="text-[10px] opacity-60 mt-1">Supports: JPG, PNG, GIF, WebP, BMP, SVG</p>
+                  </div>
+                  
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-[0.2em] mb-2">Photo Name *</label>
                     <input

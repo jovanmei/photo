@@ -30,6 +30,7 @@ export const initialAlbums: Album[] = [
     photos: [
       {
         id: "r30tmhbnz",
+        // url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_9599.jpeg",
         url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1771947196/photo-gallery/zms9o7p8t/IMG_4667_hoqgbr.jpg",
         name: "IMG_4667",
         uploadDate: new Date("2026-02-24")
@@ -90,33 +91,21 @@ export const initialAlbums: Album[] = [
       },
       {
         id: "yr3v6dvvk",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/990FA0ED-2E5B-4BA8-ACFB-A243C444B519.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118403/photo-gallery/zms9o7p8t/990FA0ED-2E5B-4BA8-ACFB-A243C444B519_mmiuus.jpg",
         name: "990FA0ED-2E5B-4BA8-ACFB-A243C444B519",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "231q4suux",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_7661.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118397/photo-gallery/zms9o7p8t/IMG_7661_tnesea.jpg",
         name: "IMG_7661",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "0j5jorub0",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_7272.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118399/photo-gallery/zms9o7p8t/IMG_7272_f51e6w.jpg",
         name: "IMG_7272",
         uploadDate: new Date("2026-02-26")
-      },
-      {
-        id: "iji9jpa1u",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_8154.JPG",
-        name: "Bike",
-        uploadDate: new Date("2026-03-02")
-      },
-      {
-        id: "b02e97kgk",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/452C328E-EC76-4EE7-BEBE-AB6882D8884B.jpeg",
-        name: "Old couples",
-        uploadDate: new Date("2026-03-02")
       }
     ]
   },
@@ -183,25 +172,25 @@ export const initialAlbums: Album[] = [
       },
       {
         id: "2fzk14j2t",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/E8674085-1987-4F26-AD5F-46EB1E087649.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118455/photo-gallery/3/E8674085-1987-4F26-AD5F-46EB1E087649_a5odrx.jpg",
         name: "E8674085-1987-4F26-AD5F-46EB1E087649",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "xc2wzdsgy",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/283A8EFE-CA1F-48A1-8841-B6F2AD619FE3.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118457/photo-gallery/3/283A8EFE-CA1F-48A1-8841-B6F2AD619FE3_kgiaxv.jpg",
         name: "283A8EFE-CA1F-48A1-8841-B6F2AD619FE3",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "5ik7eniya",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_6797.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118458/photo-gallery/3/IMG_6797_g3qiaa.jpg",
         name: "IMG_6797",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "fqp8phzwd",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_6119.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118460/photo-gallery/3/IMG_6119_zscn5n.jpg",
         name: "IMG_6119",
         uploadDate: new Date("2026-02-26")
       }
@@ -230,13 +219,13 @@ export const initialAlbums: Album[] = [
       },
       {
         id: "gubysxwlo",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_6988.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772117996/photo-gallery/5r9k8nfz5/IMG_6988_tuqgsb.jpg",
         name: "IMG_6988",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "f0u5i7zpx",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_9353.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772117993/photo-gallery/5r9k8nfz5/IMG_9353_h8opry.jpg",
         name: "IMG_9353",
         uploadDate: new Date("2026-02-26")
       },
@@ -262,45 +251,39 @@ export const initialAlbums: Album[] = [
       },
       {
         id: "omy0r7qui",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_9362.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772117992/photo-gallery/5r9k8nfz5/IMG_9362_rdcg5n.jpg",
         name: "IMG_9362",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "k5cwwu9qq",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_9337.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772117995/photo-gallery/5r9k8nfz5/IMG_9337_dzsit7.jpg",
         name: "IMG_9337",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "yztppjvb5",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_6980.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772117997/photo-gallery/5r9k8nfz5/IMG_6980_iwh3bq.jpg",
         name: "IMG_6980",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "atkpojmdy",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_6929.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772117998/photo-gallery/5r9k8nfz5/IMG_6929_gsmrjq.jpg",
         name: "IMG_6929",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "3u68dgbgg",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_6404.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772117999/photo-gallery/5r9k8nfz5/IMG_6404_pxv3nw.jpg",
         name: "IMG_6404",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "rps873c35",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_9084.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118540/photo-gallery/5r9k8nfz5/IMG_9084_jsj2he.jpg",
         name: "IMG_9084",
         uploadDate: new Date("2026-02-26")
-      },
-      {
-        id: "2jftlqgmp",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_6944.jpeg",
-        name: "statue",
-        uploadDate: new Date("2026-03-02")
       }
     ]
   },
@@ -354,13 +337,13 @@ export const initialAlbums: Album[] = [
       },
       {
         id: "olssxrm4u",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_3975.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118060/photo-gallery/1/IMG_3975_pqqgbi.jpg",
         name: "IMG_3975",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "nkjnilzcw",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_6117.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118062/photo-gallery/1/IMG_6117_txnryg.jpg",
         name: "IMG_6117",
         uploadDate: new Date("2026-02-26")
       }
@@ -403,7 +386,7 @@ export const initialAlbums: Album[] = [
       },
       {
         id: "k4rajsayv",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_4906.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118166/photo-gallery/vpilj9fcm/IMG_4906_laikts.jpg",
         name: "IMG_4906",
         uploadDate: new Date("2026-02-26")
       },
@@ -417,43 +400,43 @@ export const initialAlbums: Album[] = [
       },
       {
         id: "qv7bcvso2",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/8338524C-76FE-4ACD-A116-328EF2D62CAA.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118132/photo-gallery/vpilj9fcm/8338524C-76FE-4ACD-A116-328EF2D62CAA_wdals8.jpg",
         name: "8338524C-76FE-4ACD-A116-328EF2D62CAA",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "mf3umydmc",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_6795.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118159/photo-gallery/vpilj9fcm/IMG_6795_j2nrjm.jpg",
         name: "IMG_6795",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "5gyax6dxl",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_7417.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118153/photo-gallery/vpilj9fcm/IMG_7417_uvrpaq.jpg",
         name: "IMG_7417",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "ugzcdhs7m",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/384967A0-412B-4842-B097-A80550832566.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118155/photo-gallery/vpilj9fcm/384967A0-412B-4842-B097-A80550832566_ppbcwg.jpg",
         name: "384967A0-412B-4842-B097-A80550832566",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "7j4elrq2l",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_6686.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118158/photo-gallery/vpilj9fcm/IMG_6686_jrfydy.jpg",
         name: "IMG_6686",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "gmb5hytcs",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_4257.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118172/photo-gallery/vpilj9fcm/IMG_4257_yvceqq.jpg",
         name: "IMG_4257",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "fjlkktiha",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/8B581C4C-4A6A-4037-BB8C-F5620CD3BDC0.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118161/photo-gallery/vpilj9fcm/8B581C4C-4A6A-4037-BB8C-F5620CD3BDC0_cqy9oe.jpg",
         name: "8B581C4C-4A6A-4037-BB8C-F5620CD3BDC0",
         uploadDate: new Date("2026-02-26")
       }
@@ -496,7 +479,7 @@ export const initialAlbums: Album[] = [
       },
       {
         id: "21vnw8g8q",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/B6627993-B810-4F35-A4F3-3AB80FAEC26A.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118341/photo-gallery/2/B6627993-B810-4F35-A4F3-3AB80FAEC26A_nuojhg.jpg",
         name: "B6627993-B810-4F35-A4F3-3AB80FAEC26A",
         uploadDate: new Date("2026-02-26")
       },
@@ -508,56 +491,55 @@ export const initialAlbums: Album[] = [
       },
       {
         id: "wo0ey7dzn",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_9599.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118289/photo-gallery/2/IMG_9599_pm4kwg.jpg",
         name: "IMG_9599",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "d7or5tr2n",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_8961.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118325/photo-gallery/2/IMG_8961_wmfxoj.jpg",
         name: "IMG_8961",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "h443sdm4t",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/B0470FE5-2E55-46ED-B075-96413B394ECE.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118328/photo-gallery/2/B0470FE5-2E55-46ED-B075-96413B394ECE_q39ptb.jpg",
         name: "B0470FE5-2E55-46ED-B075-96413B394ECE",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "83tyr3crw",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_8157.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118330/photo-gallery/2/IMG_8157_mvdgjk.jpg",
         name: "IMG_8157",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "iwsy3zxnv",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/28941EC9-2087-4920-8447-088374309660.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118338/photo-gallery/2/28941EC9-2087-4920-8447-088374309660_kplzik.jpg",
         name: "28941EC9-2087-4920-8447-088374309660",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "wsdo1usfu",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/IMG_7754.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118333/photo-gallery/2/IMG_7754_lmmtze.jpg",
         name: "IMG_7754",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "vjjz1ezyx",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/55B540DE-A25D-4ABF-BAD0-8C5FCEAF3A73.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118348/photo-gallery/2/55B540DE-A25D-4ABF-BAD0-8C5FCEAF3A73_supkj6.jpg",
         name: "55B540DE-A25D-4ABF-BAD0-8C5FCEAF3A73",
         uploadDate: new Date("2026-02-26")
       },
       {
         id: "v5kpli8ul",
-        url: "http://tb3khrrmo.hd-bkt.clouddn.com/F1BA48D6-C1E6-4321-851D-B8AE732C781D.jpeg",
+        url: "https://res.cloudinary.com/di43jfzx7/image/upload/v1772118345/photo-gallery/2/F1BA48D6-C1E6-4321-851D-B8AE732C781D_lytppl.jpg",
         name: "F1BA48D6-C1E6-4321-851D-B8AE732C781D",
         uploadDate: new Date("2026-02-26")
       }
     ]
   }
 ];
-
 
 
 
